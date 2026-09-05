@@ -637,15 +637,6 @@ export const DashboardPage: React.FC = () => {
       {/* ========================================================================= */}
       {isManagerOrAdmin && (
         <div className="space-y-6 font-sans">
-          <div className="pb-4 border-b border-border">
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              Payroll Dashboard
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Dashboard should help payroll/HR users understand payments, staffing impact, leave patterns, and attendance quality for the selected period.
-            </p>
-          </div>
-
           {/* Filter Bar */}
           <div className="p-4 rounded-xl bg-card border border-border shadow-sm flex flex-wrap items-center gap-4 text-xs font-mono">
             <div className="flex items-center gap-2">
