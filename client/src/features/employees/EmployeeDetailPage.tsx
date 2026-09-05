@@ -257,10 +257,10 @@ export const EmployeeDetailPage: React.FC = () => {
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 text-xs">
                   {allocationsList.map((alloc) => {
-                    const total = Number(alloc.allocatedAmount) || Number(alloc.allocatedDays) || 1;
-                    const used = Number(alloc.takenAmount) || Number(alloc.usedDays) || 0;
-                    const rem = Number(alloc.remainingAmount) || Math.max(0, total - used);
-                    const pct = Math.min(100, Math.max(0, (rem / total) * 100));
+                    const total = Number(alloc.allocatedAmount ?? alloc.allocatedDays) || 0;
+                    const used = Number(alloc.takenAmount ?? alloc.usedDays) || 0;
+                    const rem = alloc.remainingAmount !== undefined ? Number(alloc.remainingAmount) : Math.max(0, total - used);
+                    const pct = total > 0 ? Math.min(100, Math.max(0, (rem / total) * 100)) : 0;
 
                     return (
                       <div key={alloc.id} className="p-4 rounded-lg bg-secondary border border-border space-y-2">

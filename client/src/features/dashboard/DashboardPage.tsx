@@ -140,9 +140,18 @@ export const DashboardPage: React.FC = () => {
   });
 
   // Calculate totals for personal employee view
-  const totalAllocatedLeave = personalAllocations.reduce((acc, a) => acc + Number(a.allocatedDays || 0), 0);
-  const totalRemainingLeave = personalAllocations.reduce((acc, a) => acc + Number(a.remainingDays || 0), 0);
-  const totalUsedLeave = personalAllocations.reduce((acc, a) => acc + Number(a.usedDays || 0), 0);
+  const totalAllocatedLeave = personalAllocations.reduce(
+    (acc, a) => acc + Number(a.allocatedAmount ?? a.allocatedDays ?? 0),
+    0
+  );
+  const totalRemainingLeave = personalAllocations.reduce(
+    (acc, a) => acc + Number(a.remainingAmount ?? a.remainingDays ?? 0),
+    0
+  );
+  const totalUsedLeave = personalAllocations.reduce(
+    (acc, a) => acc + Number(a.takenAmount ?? a.usedDays ?? 0),
+    0
+  );
 
   const activeContract = personalProfile?.contracts?.[0];
   const activeWage = activeContract ? Number(activeContract.wagePerMonth) : null;
@@ -518,10 +527,10 @@ export const DashboardPage: React.FC = () => {
                     </p>
                   ) : (
                     personalAllocations.map((alloc) => {
-                      const total = Number(alloc.allocatedDays) || 1;
-                      const rem = Number(alloc.remainingDays) || 0;
-                      const used = Number(alloc.usedDays) || 0;
-                      const pct = Math.min(100, Math.max(0, (rem / total) * 100));
+                      const total = Number(alloc.allocatedAmount ?? alloc.allocatedDays) || 0;
+                      const used = Number(alloc.takenAmount ?? alloc.usedDays) || 0;
+                      const rem = alloc.remainingAmount !== undefined ? Number(alloc.remainingAmount) : Math.max(0, total - used);
+                      const pct = total > 0 ? Math.min(100, Math.max(0, (rem / total) * 100)) : 0;
 
                       return (
                         <div key={alloc.id} className="p-3.5 rounded-lg bg-secondary border border-border space-y-2">
