@@ -152,7 +152,7 @@ export const DashboardPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-5 h-5 text-primary" />
-            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
               {isManagerOrAdmin ? 'Main Dashboard' : 'My Employee Dashboard'}
             </h1>
           </div>
@@ -162,27 +162,6 @@ export const DashboardPage: React.FC = () => {
               : 'Personal employee profile, live attendance clock, compensation baseline, and leave records.'}
           </p>
         </div>
-
-        {/* Filter Bar - ONLY FOR MANAGERS/ADMINS, REMOVED ON EMPLOYEE WEBPAGE */}
-        {isManagerOrAdmin && (
-          <div className="flex items-center gap-3">
-            <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-card border border-border text-xs shadow-sm">
-              <Filter className="w-3.5 h-3.5 text-muted-foreground" />
-              <select
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                className="bg-transparent text-foreground focus:outline-none"
-              >
-                <option value="" className="bg-popover text-popover-foreground">All Departments</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id} className="bg-popover text-popover-foreground">
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </div>
-        )}
       </div>
 
       {/* ========================================================================= */}
@@ -201,13 +180,13 @@ export const DashboardPage: React.FC = () => {
                     className="w-16 h-16 rounded-full border-2 border-primary/20 object-cover shrink-0 shadow-sm"
                   />
                 ) : (
-                  <div className="w-16 h-16 rounded-full bg-secondary border border-border flex items-center justify-center text-primary font-serif font-bold text-2xl shrink-0 shadow-sm">
+                  <div className="w-16 h-16 rounded-full bg-secondary border border-border flex items-center justify-center text-primary font-bold text-2xl shrink-0 shadow-sm">
                     {personalProfile?.name?.[0] || user?.email?.[0] || 'E'}
                   </div>
                 )}
                 <div>
                   <div className="flex flex-wrap items-center gap-2">
-                    <h2 className="font-serif text-2xl font-bold text-foreground">
+                    <h2 className="text-2xl font-bold text-foreground">
                       {personalProfile?.name || user?.employee?.name || user?.email}
                     </h2>
                     <span className="px-2 py-0.5 rounded-full bg-emerald-500/10 border border-emerald-500/20 text-emerald-700 dark:text-emerald-400 text-[10px] font-bold uppercase tracking-wider font-mono">
@@ -369,7 +348,7 @@ export const DashboardPage: React.FC = () => {
                 <PlaneTakeoff className="w-4 h-4 text-amber-600 dark:text-amber-400" />
               </div>
               <div>
-                <span className="font-serif text-lg font-bold text-foreground font-mono">
+                <span className="text-lg font-bold text-foreground font-mono">
                   {totalRemainingLeave} Days
                 </span>
                 <p className="text-[11px] text-muted-foreground mt-1">
@@ -394,7 +373,7 @@ export const DashboardPage: React.FC = () => {
                 <CalendarDays className="w-4 h-4 text-blue-600 dark:text-blue-400" />
               </div>
               <div>
-                <span className="font-serif text-base font-bold text-foreground block truncate">
+                <span className="text-base font-bold text-foreground block truncate">
                   {personalProfile?.workingSchedule?.name || 'Standard Schedule'}
                 </span>
                 <p className="text-[11px] text-muted-foreground mt-1 font-mono">
@@ -416,7 +395,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-border">
                   <div className="flex items-center gap-2">
                     <CreditCard className="w-4 h-4 text-primary" />
-                    <h3 className="font-serif text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-bold text-foreground">
                       Banking & Statutory Details
                     </h3>
                   </div>
@@ -477,7 +456,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-border">
                   <div className="flex items-center gap-2">
                     <CalendarDays className="w-4 h-4 text-primary" />
-                    <h3 className="font-serif text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-bold text-foreground">
                       Weekly Shift Schedule
                     </h3>
                   </div>
@@ -532,7 +511,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-border">
                   <div className="flex items-center gap-2">
                     <PlaneTakeoff className="w-4 h-4 text-primary" />
-                    <h3 className="font-serif text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-bold text-foreground">
                       My Time Off Allocations & Balances
                     </h3>
                   </div>
@@ -591,7 +570,7 @@ export const DashboardPage: React.FC = () => {
                 <div className="flex items-center justify-between pb-3 border-b border-border">
                   <div className="flex items-center gap-2">
                     <ReceiptText className="w-4 h-4 text-primary" />
-                    <h3 className="font-serif text-sm font-bold text-foreground">
+                    <h3 className="text-sm font-bold text-foreground">
                       My Recent Payslips
                     </h3>
                   </div>
@@ -678,7 +657,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             <div className="pt-2">
-              <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
+              <h1 className="text-2xl font-bold text-foreground tracking-tight">
                 Payroll Dashboard
               </h1>
               <p className="text-xs text-muted-foreground mt-0.5">
@@ -746,8 +725,8 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Total Net Salary Paid
               </span>
-              <span className="font-serif text-2xl font-bold text-foreground block">
-                ₹ 18.4L
+              <span className="text-2xl font-bold text-foreground block">
+                $18.4L
               </span>
               <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold font-mono">
                 +8.5% vs previous month
@@ -759,7 +738,7 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Payslips Generated
               </span>
-              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
+              <span className="text-2xl font-bold text-foreground font-mono block">
                 148
               </span>
               <span className="text-[10px] text-muted-foreground block font-mono">
@@ -772,8 +751,8 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Avg Salary / Employee
               </span>
-              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
-                ₹ 12,432
+              <span className="text-2xl font-bold text-foreground font-mono block">
+                $12,432
               </span>
               <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-mono">
                 Based on current payrun
@@ -785,7 +764,7 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Approved Time Off Days
               </span>
-              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
+              <span className="text-2xl font-bold text-foreground font-mono block">
                 34 Days
               </span>
               <span className="text-[10px] text-muted-foreground block font-mono">
@@ -798,7 +777,7 @@ export const DashboardPage: React.FC = () => {
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Attendance Health
               </span>
-              <span className="font-serif text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono block">
+              <span className="text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono block">
                 94%
               </span>
               <span className="text-[10px] text-muted-foreground block font-mono">
@@ -812,17 +791,17 @@ export const DashboardPage: React.FC = () => {
             {/* Chart 1: Salary Cost by Department */}
             <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Salary Cost by Department</h3>
+                <h3 className="text-sm font-bold text-foreground">Salary Cost by Department</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Payslips + Employee Department</span>
               </div>
 
               <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-b border-border font-mono text-[10px]">
                 {[
-                  { dept: 'HR', val: '₹ 110k', height: '65%' },
-                  { dept: 'Sales', val: '₹ 150k', height: '85%' },
-                  { dept: 'Support', val: '₹ 90k', height: '50%' },
-                  { dept: 'Finance', val: '₹ 120k', height: '70%' },
-                  { dept: 'IT', val: '₹ 170k', height: '95%' }
+                  { dept: 'HR', val: '$110k', height: '65%' },
+                  { dept: 'Sales', val: '$150k', height: '85%' },
+                  { dept: 'Support', val: '$90k', height: '50%' },
+                  { dept: 'Finance', val: '$120k', height: '70%' },
+                  { dept: 'IT', val: '$170k', height: '95%' }
                 ].map((bar) => (
                   <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
                     <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
@@ -839,7 +818,7 @@ export const DashboardPage: React.FC = () => {
             {/* Chart 2: Monthly Net Salary Trend */}
             <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Monthly Net Salary Trend</h3>
+                <h3 className="text-sm font-bold text-foreground">Monthly Net Salary Trend</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: historical Payslips / Payruns</span>
               </div>
 
@@ -877,7 +856,7 @@ export const DashboardPage: React.FC = () => {
             {/* Widget 3: Payslip Status & Payroll Alerts */}
             <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Payslip Status & Payroll Alerts</h3>
+                <h3 className="text-sm font-bold text-foreground">Payslip Status & Payroll Alerts</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Payrun + Payslip validation</span>
               </div>
 
@@ -921,11 +900,11 @@ export const DashboardPage: React.FC = () => {
           </div>
 
           {/* Bottom Row Analytics & Tables */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {/* Widget 1: Attendance Overview */}
             <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Attendance Overview</h3>
+                <h3 className="text-sm font-bold text-foreground">Attendance Overview</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Attendance</span>
               </div>
 
@@ -954,7 +933,7 @@ export const DashboardPage: React.FC = () => {
             {/* Widget 2: Time Off Overview */}
             <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Time Off Overview</h3>
+                <h3 className="text-sm font-bold text-foreground">Time Off Overview</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Time Off Requests + Allocations</span>
               </div>
 
@@ -995,7 +974,7 @@ export const DashboardPage: React.FC = () => {
             {/* Widget 3: Department Overview */}
             <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
               <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Department Overview</h3>
+                <h3 className="text-sm font-bold text-foreground">Department Overview</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Employee + Contract + Payslip totals</span>
               </div>
 
@@ -1012,57 +991,26 @@ export const DashboardPage: React.FC = () => {
                     <tr>
                       <td className="py-1.5 font-semibold text-foreground">IT</td>
                       <td className="py-1.5 text-center">18</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">₹ 4.2L</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">$4.2L</td>
                     </tr>
                     <tr>
                       <td className="py-1.5 font-semibold text-foreground">Sales</td>
                       <td className="py-1.5 text-center">22</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">₹ 5.1L</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">$5.1L</td>
                     </tr>
                     <tr>
                       <td className="py-1.5 font-semibold text-foreground">HR</td>
                       <td className="py-1.5 text-center">5</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">₹ 1.4L</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">$1.4L</td>
                     </tr>
                     <tr>
                       <td className="py-1.5 font-semibold text-foreground">Support</td>
                       <td className="py-1.5 text-center">14</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">₹ 3.3L</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">$3.3L</td>
                     </tr>
                   </tbody>
                 </table>
               </div>
-            </div>
-
-            {/* Widget 4: Models to Aggregate */}
-            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
-              <div>
-                <h3 className="font-serif text-sm font-bold text-foreground">Models to Aggregate</h3>
-                <span className="text-[10px] text-sky-400 font-mono italic">This is the actual challenge behind the dashboard.</span>
-              </div>
-
-              <ul className="space-y-2 text-[11px] text-muted-foreground font-mono leading-relaxed pt-1">
-                <li className="flex items-start gap-1">
-                  <span className="text-sky-400 shrink-0">•</span>
-                  <span><strong className="text-foreground">Employees / Departments</strong> → headcount, ownership, grouping</span>
-                </li>
-                <li className="flex items-start gap-1">
-                  <span className="text-sky-400 shrink-0">•</span>
-                  <span><strong className="text-foreground">Contracts</strong> → wage, schedule, active employees</span>
-                </li>
-                <li className="flex items-start gap-1">
-                  <span className="text-sky-400 shrink-0">•</span>
-                  <span><strong className="text-foreground">Payruns / Payslips</strong> → salary totals, paid vs pending, trend data</span>
-                </li>
-                <li className="flex items-start gap-1">
-                  <span className="text-sky-400 shrink-0">•</span>
-                  <span><strong className="text-foreground">Attendance</strong> → presence, absences, late entries, overtime</span>
-                </li>
-                <li className="flex items-start gap-1">
-                  <span className="text-sky-400 shrink-0">•</span>
-                  <span><strong className="text-foreground">Time Off Requests / Allocations</strong> → leave taken and leave balances</span>
-                </li>
-              </ul>
             </div>
           </div>
         </div>
