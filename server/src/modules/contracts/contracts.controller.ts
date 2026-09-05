@@ -133,6 +133,35 @@ export const createContract = async (req: Request, res: Response, next: NextFunc
       }
     });
 
+    // Auto-allocate leaves if contract is 'running'
+    if (status === 'running') {
+      const yearStart = new Date(start.getFullYear(), 0, 1);
+      const yearEnd = new Date(start.getFullYear(), 11, 31);
+      const types = await prisma.timeOffType.findMany({ where: { requiresAllocation: true } });
+      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 10.0 };
+      
+      for (const type of types) {
+        const existing = await prisma.timeOffAllocation.findFirst({
+          where: { employeeId, timeOffTypeId: type.id, validFrom: { lte: yearEnd }, validTo: { gte: yearStart } }
+        });
+        if (!existing) {
+          const amount = defaultAllocations[type.name] || 15.0;
+          await prisma.timeOffAllocation.create({
+            data: {
+              employeeId,
+              timeOffTypeId: type.id,
+              allocatedAmount: amount,
+              takenAmount: 0,
+              remainingAmount: amount,
+              validFrom: yearStart,
+              validTo: yearEnd,
+              status: 'approved'
+            }
+          });
+        }
+      }
+    }
+
     return res.status(201).json({ success: true, message: 'Contract created successfully.', data: contract });
   } catch (err) {
     next(err);
@@ -205,6 +234,35 @@ export const updateContract = async (req: Request, res: Response, next: NextFunc
         salaryStructure: true
       }
     });
+
+    // Auto-allocate leaves if contract was just set to 'running'
+    if (newStatus === 'running') {
+      const yearStart = new Date(start.getFullYear(), 0, 1);
+      const yearEnd = new Date(start.getFullYear(), 11, 31);
+      const types = await prisma.timeOffType.findMany({ where: { requiresAllocation: true } });
+      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 10.0 };
+      
+      for (const type of types) {
+        const existing = await prisma.timeOffAllocation.findFirst({
+          where: { employeeId: updated.employeeId, timeOffTypeId: type.id, validFrom: { lte: yearEnd }, validTo: { gte: yearStart } }
+        });
+        if (!existing) {
+          const amount = defaultAllocations[type.name] || 15.0;
+          await prisma.timeOffAllocation.create({
+            data: {
+              employeeId: updated.employeeId,
+              timeOffTypeId: type.id,
+              allocatedAmount: amount,
+              takenAmount: 0,
+              remainingAmount: amount,
+              validFrom: yearStart,
+              validTo: yearEnd,
+              status: 'approved'
+            }
+          });
+        }
+      }
+    }
 
     return res.json({ success: true, message: 'Contract updated successfully.', data: updated });
   } catch (err) {

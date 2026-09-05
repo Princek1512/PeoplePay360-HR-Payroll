@@ -16,6 +16,7 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
 }) => {
   const { user } = useAuth();
   const [types, setTypes] = useState<any[]>([]);
+  const [allocations, setAllocations] = useState<any[]>([]);
   const [timeOffTypeId, setTimeOffTypeId] = useState('');
   const [startDate, setStartDate] = useState('');
   const [endDate, setEndDate] = useState('');
@@ -25,10 +26,14 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
-      apiClient.get('/timeoff/types').then((res) => {
-        setTypes(res.data.data || []);
-        if (res.data.data?.length > 0) {
-          setTimeOffTypeId(res.data.data[0].id);
+      Promise.all([
+        apiClient.get('/timeoff/types'),
+        apiClient.get(`/timeoff/allocations?employeeId=${user?.employeeId}`)
+      ]).then(([typesRes, allocRes]) => {
+        setTypes(typesRes.data.data || []);
+        setAllocations(allocRes.data.data || []);
+        if (typesRes.data.data?.length > 0) {
+          setTimeOffTypeId(typesRes.data.data[0].id);
         }
       }).catch(console.error);
 
@@ -60,6 +65,17 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
     }
 
     const durationAmount = calculateDuration(startDate, endDate);
+
+    const selectedType = types.find(t => t.id === timeOffTypeId);
+    const requiresAllocation = selectedType?.requiresAllocation ?? true;
+    const selectedAllocation = allocations.find(a => a.timeOffTypeId === timeOffTypeId);
+    const remainingDays = selectedAllocation ? Number(selectedAllocation.remainingAmount || 0) : 0;
+
+    if (requiresAllocation && durationAmount > remainingDays) {
+      setError(`Cannot request ${durationAmount} days. You only have ${remainingDays} days available for this leave type.`);
+      setLoading(false);
+      return;
+    }
 
     try {
       await apiClient.post('/timeoff/requests', {
@@ -109,6 +125,29 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
               </option>
             ))}
           </select>
+          {timeOffTypeId && (
+            <div className="mt-2 text-[11px]">
+              {(() => {
+                const sType = types.find(t => t.id === timeOffTypeId);
+                if (!sType?.requiresAllocation) {
+                  return <span className="text-muted-foreground italic">No allocation required for this leave type.</span>;
+                }
+                const sAlloc = allocations.find(a => a.timeOffTypeId === timeOffTypeId);
+                const rem = sAlloc ? Number(sAlloc.remainingAmount || 0) : 0;
+                const used = sAlloc ? Number(sAlloc.takenAmount || 0) : 0;
+                const tot = sAlloc ? Number(sAlloc.allocatedAmount || 0) : 0;
+                
+                if (!sAlloc) {
+                  return <span className="text-amber-600 font-medium">You have 0 allocated days for this leave type.</span>;
+                }
+                return (
+                  <span className={rem > 0 ? "text-emerald-600 font-medium" : "text-amber-600 font-medium"}>
+                    Available Balance: {rem} days (Used {used} of {tot} allocated)
+                  </span>
+                );
+              })()}
+            </div>
+          )}
         </div>
 
         <div className="grid grid-cols-2 gap-4">
