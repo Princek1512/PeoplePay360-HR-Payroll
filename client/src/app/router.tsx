@@ -75,7 +75,13 @@ export const router = createBrowserRouter([
           },
           {
             path: 'employees',
-            element: <EmployeeKanbanPage />
+            element: <ProtectedRoute module="employees" action="read" />,
+            children: [
+              {
+                index: true,
+                element: <EmployeeKanbanPage />
+              }
+            ]
           },
           {
             path: 'employees/:id',

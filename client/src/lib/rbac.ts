@@ -19,7 +19,6 @@ export const ROLE_PERMISSIONS: Record<UserRoleType, ModulePermissions> = {
     timeoff: ['read', 'create'],
     payslips: ['read'],
     dashboard: ['read'],
-    employees: ['read'],
   },
   [UserRoleType.HR_MANAGER]: {
     profile: ['read', 'update'],

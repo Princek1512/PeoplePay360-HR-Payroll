@@ -17,7 +17,11 @@ import {
 } from 'lucide-react';
 
 export const Sidebar: React.FC = () => {
-  const { can, hasRole } = useAuth();
+  const { can, hasRole, user } = useAuth();
+
+  const isManagerOrAdmin = user?.roles?.some((r) =>
+    ['Admin', 'HR Manager', 'HR Payroll Manager', 'HR Payroll User'].includes(r)
+  );
 
   const navGroups = [
     {
@@ -38,7 +42,7 @@ export const Sidebar: React.FC = () => {
           name: 'Employees',
           to: '/employees',
           icon: Users,
-          show: can('employees', 'read')
+          show: isManagerOrAdmin && can('employees', 'read')
         },
         {
           name: 'Contracts',

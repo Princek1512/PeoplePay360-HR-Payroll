@@ -23,9 +23,13 @@ export function AppLayout() {
   const { user, logout, hasRole, can } = useAuth()
   const { isCheckedIn, toggleWidget } = useAttendance()
 
+  const isManagerOrAdmin = user?.roles?.some((r) =>
+    ['Admin', 'HR Manager', 'HR Payroll Manager', 'HR Payroll User'].includes(r)
+  );
+
   const navItems = [
     { name: "Dashboard", href: "/dashboard", icon: LayoutDashboard, show: can("dashboard", "read") },
-    { name: "Employees", href: "/employees", icon: Users, show: can("employees", "read") },
+    { name: "Employees", href: "/employees", icon: Users, show: isManagerOrAdmin && can("employees", "read") },
     { name: "Contracts", href: "/contracts", icon: FileText, show: can("contracts", "read") },
     { name: "Schedules", href: "/schedules", icon: CalendarDays, show: can("schedules", "read") },
     { name: "Attendance", href: "/attendance", icon: Clock, show: can("attendance", "read") },
