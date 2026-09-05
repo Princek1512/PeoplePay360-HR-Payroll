@@ -28,7 +28,7 @@ const ProtectedRoute: React.FC<{ module?: string; action?: 'read' | 'create' | '
   const { isAuthenticated, isLoading, can, hasRole, user } = useAuth();
 
   if (isLoading) {
-    return <div className="min-h-screen bg-[#070b14] flex items-center justify-center text-slate-500 font-mono text-xs">Authenticating PeoplePay360 session...</div>;
+    return <div className="min-h-screen bg-background flex items-center justify-center text-muted-foreground font-mono text-xs">Authenticating PeoplePay360 session...</div>;
   }
 
   if (!isAuthenticated) {

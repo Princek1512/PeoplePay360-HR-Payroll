@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { apiClient } from '../../lib/apiClient';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatCurrency, formatDate } from '../../lib/formatters';
-import { ReceiptText, Search, ArrowUpRight, AlertTriangle } from 'lucide-react';
+import { ReceiptText, Search, ArrowUpRight } from 'lucide-react';
 
 export const PayslipListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -32,35 +32,35 @@ export const PayslipListPage: React.FC = () => {
   );
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header */}
-      <div className="pb-5 border-b border-slate-800">
+      <div className="pb-5 border-b border-border">
         <div className="flex items-center gap-2">
-          <ReceiptText className="w-5 h-5 text-brand-400" />
-          <h1 className="text-xl font-bold text-white tracking-tight">Payslip Archive</h1>
+          <ReceiptText className="w-5 h-5 text-primary" />
+          <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Payslip Archive</h1>
         </div>
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-muted-foreground mt-1">
           Historical and active employee payslips with itemized salary rule breakdowns.
         </p>
       </div>
 
       {/* Search */}
       <div className="relative w-full max-w-sm">
-        <Search className="w-4 h-4 text-slate-500 absolute left-3.5 top-1/2 -translate-y-1/2" />
+        <Search className="w-4 h-4 text-muted-foreground absolute left-3.5 top-1/2 -translate-y-1/2" />
         <input
           type="text"
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by employee or pay run..."
-          className="w-full bg-slate-900 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-xs text-white placeholder:text-slate-500 focus:outline-none focus:border-brand-500"
+          className="w-full bg-background border border-input rounded-md py-1.5 pl-10 pr-4 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
         />
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-xl">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-800">
+          <table className="w-full text-left text-xs text-foreground">
+            <thead className="bg-secondary text-muted-foreground uppercase tracking-wider text-[10px] font-bold border-b border-border">
               <tr>
                 <th className="px-6 py-3.5">Employee</th>
                 <th className="px-6 py-3.5">Pay Run</th>
@@ -72,16 +72,16 @@ export const PayslipListPage: React.FC = () => {
                 <th className="px-6 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">
                     Loading payslips...
                   </td>
                 </tr>
               ) : filtered.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">
                     No payslips found.
                   </td>
                 </tr>
@@ -90,33 +90,32 @@ export const PayslipListPage: React.FC = () => {
                   <tr
                     key={p.id}
                     onClick={() => navigate(`/payslips/${p.id}`)}
-                    className="hover:bg-slate-850/40 cursor-pointer transition-colors"
+                    className="hover:bg-secondary/60 cursor-pointer transition-colors"
                   >
-                    <td className="px-6 py-4">
-                      <div className="font-bold text-white">{p.employee?.name}</div>
-                      <div className="text-[11px] text-slate-400">{p.employee?.department?.name || 'Staff'}</div>
+                    <td className="px-6 py-4 font-bold text-foreground">
+                      {p.employee?.name}
                     </td>
-                    <td className="px-6 py-4 font-semibold text-slate-200">
+                    <td className="px-6 py-4 text-muted-foreground">
                       {p.payrun?.name}
                     </td>
-                    <td className="px-6 py-4 font-mono text-slate-300">
-                      {formatDate(p.payrun?.periodStart)} <span className="text-slate-500">➔</span> {formatDate(p.payrun?.periodEnd)}
+                    <td className="px-6 py-4 font-mono text-muted-foreground">
+                      {formatDate(p.periodStart)} — {formatDate(p.periodEnd)}
                     </td>
                     <td className="px-6 py-4 font-mono">
                       {Number(p.workedDays)} days
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-slate-200">
+                    <td className="px-6 py-4 font-mono font-bold text-foreground">
                       {formatCurrency(p.grossSalary)}
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-emerald-400 text-sm">
+                    <td className="px-6 py-4 font-mono font-bold text-emerald-700 dark:text-emerald-400">
                       {formatCurrency(p.netSalary)}
                     </td>
                     <td className="px-6 py-4">
                       <StatusBadge status={p.status} size="sm" />
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-brand-400 hover:text-brand-300 font-semibold inline-flex items-center gap-1">
-                        View <ArrowUpRight className="w-3.5 h-3.5" />
+                      <span className="text-primary hover:underline font-medium inline-flex items-center gap-1">
+                        View Statement <ArrowUpRight className="w-3.5 h-3.5" />
                       </span>
                     </td>
                   </tr>

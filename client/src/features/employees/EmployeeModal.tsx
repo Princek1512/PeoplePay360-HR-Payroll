@@ -123,7 +123,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-4">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Full Name
             </label>
             <input
@@ -131,13 +131,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Jane Doe"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Work Email
             </label>
             <input
@@ -145,13 +145,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               placeholder="jane.doe@company.com"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Phone Number
             </label>
             <input
@@ -159,18 +159,18 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
               placeholder="+1 (555) 012-3456"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Department
             </label>
             <select
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="">-- Select Department --</option>
               {departments.map((d) => (
@@ -182,13 +182,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Working Schedule
             </label>
             <select
               value={workingScheduleId}
               onChange={(e) => setWorkingScheduleId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="">-- Select Schedule --</option>
               {schedules.map((s) => (
@@ -200,13 +200,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Employment Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -215,13 +215,13 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
         </div>
 
         {/* Banking Section */}
-        <div className="pt-4 border-t border-slate-800">
-          <h4 className="text-xs font-bold uppercase tracking-wider text-brand-400 mb-3">
+        <div className="pt-4 border-t border-border">
+          <h4 className="text-xs font-bold uppercase tracking-wider text-primary mb-3 font-serif">
             Payroll Banking & Tax Identification
           </h4>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 Bank Account Number
               </label>
               <input
@@ -229,12 +229,12 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 value={bankAccountNumber}
                 onChange={(e) => setBankAccountNumber(e.target.value)}
                 placeholder="1234567890"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 Bank Name
               </label>
               <input
@@ -242,12 +242,12 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 value={bankName}
                 onChange={(e) => setBankName(e.target.value)}
                 placeholder="e.g. JPMorgan Chase"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 Routing / IFSC Code
               </label>
               <input
@@ -255,12 +255,12 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 value={bankIfsc}
                 onChange={(e) => setBankIfsc(e.target.value)}
                 placeholder="CHASUS33"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 PAN / Tax Identification
               </label>
               <input
@@ -268,24 +268,24 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
                 value={panNumber}
                 onChange={(e) => setPanNumber(e.target.value)}
                 placeholder="ABCDE1234F"
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               />
             </div>
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : employeeToEdit ? 'Save Changes' : 'Create Employee'}
           </button>

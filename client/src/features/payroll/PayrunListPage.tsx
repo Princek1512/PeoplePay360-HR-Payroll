@@ -5,7 +5,12 @@ import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatCurrency, formatDate } from '../../lib/formatters';
 import { PayrunWizardModal } from './PayrunWizardModal';
 import { useAuth } from '../../context/AuthContext';
-import { CircleDollarSign, Plus, ArrowUpRight, AlertTriangle, CheckCircle2 } from 'lucide-react';
+import {
+  CreditCard,
+  Plus,
+  ArrowUpRight,
+  AlertTriangle
+} from 'lucide-react';
 
 export const PayrunListPage: React.FC = () => {
   const navigate = useNavigate();
@@ -31,23 +36,16 @@ export const PayrunListPage: React.FC = () => {
     fetchPayruns();
   }, []);
 
-  const handlePayrunCreated = (newId?: string) => {
-    fetchPayruns();
-    if (newId) {
-      navigate(`/payruns/${newId}`);
-    }
-  };
-
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Header */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
         <div>
           <div className="flex items-center gap-2">
-            <CircleDollarSign className="w-5 h-5 text-brand-400" />
-            <h1 className="text-xl font-bold text-white tracking-tight">Pay Runs & Computations</h1>
+            <CreditCard className="w-5 h-5 text-primary" />
+            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Payrun Management</h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
+          <p className="text-xs text-muted-foreground mt-1">
             2-step execution pipeline turning contract wage rules and daily attendance into validated, printable payslips.
           </p>
         </div>
@@ -55,7 +53,7 @@ export const PayrunListPage: React.FC = () => {
         {can('payruns', 'create') && (
           <button
             onClick={() => setIsWizardOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-600/30 transition-all"
+            className="inline-flex items-center gap-2 px-3.5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all"
           >
             <Plus className="w-4 h-4" />
             <span>Launch Payrun Wizard</span>
@@ -64,10 +62,10 @@ export const PayrunListPage: React.FC = () => {
       </div>
 
       {/* Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-xl">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-800">
+          <table className="w-full text-left text-xs text-foreground">
+            <thead className="bg-secondary text-muted-foreground uppercase tracking-wider text-[10px] font-bold border-b border-border">
               <tr>
                 <th className="px-6 py-3.5">Pay Run Name</th>
                 <th className="px-6 py-3.5">Salary Structure</th>
@@ -79,16 +77,16 @@ export const PayrunListPage: React.FC = () => {
                 <th className="px-6 py-3.5 text-right">Action</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-border">
               {loading ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">
                     Loading pay runs...
                   </td>
                 </tr>
               ) : payruns.length === 0 ? (
                 <tr>
-                  <td colSpan={8} className="px-6 py-10 text-center text-slate-500">
+                  <td colSpan={8} className="px-6 py-10 text-center text-muted-foreground">
                     No pay runs created yet. Click "Launch Payrun Wizard" above to start.
                   </td>
                 </tr>
@@ -97,21 +95,21 @@ export const PayrunListPage: React.FC = () => {
                   <tr
                     key={pr.id}
                     onClick={() => navigate(`/payruns/${pr.id}`)}
-                    className="hover:bg-slate-850/40 cursor-pointer transition-colors"
+                    className="hover:bg-secondary/60 cursor-pointer transition-colors"
                   >
-                    <td className="px-6 py-4 font-bold text-white text-sm">
+                    <td className="px-6 py-4 font-bold text-foreground">
                       {pr.name}
                     </td>
-                    <td className="px-6 py-4 font-semibold text-brand-400">
-                      {pr.salaryStructureName}
+                    <td className="px-6 py-4 text-muted-foreground">
+                      {pr.salaryStructure?.name || 'Default'}
                     </td>
-                    <td className="px-6 py-4 font-mono text-slate-300">
-                      {formatDate(pr.periodStart)} <span className="text-slate-500">➔</span> {formatDate(pr.periodEnd)}
+                    <td className="px-6 py-4 font-mono text-muted-foreground">
+                      {formatDate(pr.periodStart)} — {formatDate(pr.periodEnd)}
                     </td>
-                    <td className="px-6 py-4 font-mono text-white font-bold">
+                    <td className="px-6 py-4 font-mono">
                       {pr.totalEmployees}
                     </td>
-                    <td className="px-6 py-4 font-mono font-bold text-emerald-400 text-sm">
+                    <td className="px-6 py-4 font-mono font-bold text-emerald-700 dark:text-emerald-400">
                       {formatCurrency(pr.totalNet)}
                     </td>
                     <td className="px-6 py-4">
@@ -119,16 +117,16 @@ export const PayrunListPage: React.FC = () => {
                     </td>
                     <td className="px-6 py-4">
                       {pr.hasBlockingWarnings ? (
-                        <span className="inline-flex items-center gap-1 text-amber-400 text-[11px] font-semibold">
-                          <AlertTriangle className="w-3.5 h-3.5" />
-                          {pr.blockingCount} Warnings
+                        <span className="text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center gap-1">
+                          <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
+                          <span>Blocking</span>
                         </span>
                       ) : (
-                        <span className="text-emerald-500 text-[11px] font-mono">Clean</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">Clear</span>
                       )}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <span className="text-brand-400 hover:text-brand-300 font-semibold inline-flex items-center gap-1">
+                      <span className="text-primary hover:underline font-medium inline-flex items-center gap-1">
                         Open <ArrowUpRight className="w-3.5 h-3.5" />
                       </span>
                     </td>
@@ -143,7 +141,7 @@ export const PayrunListPage: React.FC = () => {
       <PayrunWizardModal
         isOpen={isWizardOpen}
         onClose={() => setIsWizardOpen(false)}
-        onSuccess={handlePayrunCreated}
+        onSuccess={fetchPayruns}
       />
     </div>
   );

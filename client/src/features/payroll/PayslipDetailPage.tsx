@@ -5,14 +5,8 @@ import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatCurrency, formatDate } from '../../lib/formatters';
 import { PayslipPrintModal } from './PayslipPrintModal';
 import {
-  ReceiptText,
   ArrowLeft,
-  Printer,
-  Building,
-  User,
-  Calendar,
-  CreditCard,
-  AlertTriangle
+  Printer
 } from 'lucide-react';
 
 export const PayslipDetailPage: React.FC = () => {
@@ -39,11 +33,11 @@ export const PayslipDetailPage: React.FC = () => {
   }, [id]);
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading payslip breakdown...</div>;
+    return <div className="p-8 text-center text-muted-foreground">Loading payslip breakdown...</div>;
   }
 
   if (!payslip) {
-    return <div className="p-8 text-center text-rose-400">Payslip record not found.</div>;
+    return <div className="p-8 text-center text-destructive">Payslip record not found.</div>;
   }
 
   let totalDeductions = 0;
@@ -52,12 +46,12 @@ export const PayslipDetailPage: React.FC = () => {
   });
 
   return (
-    <div className="space-y-6 max-w-4xl mx-auto">
+    <div className="space-y-6 max-w-4xl mx-auto font-sans">
       {/* Back button & Print action */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate(-1)}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back</span>
@@ -65,7 +59,7 @@ export const PayslipDetailPage: React.FC = () => {
 
         <button
           onClick={() => setIsPrintModalOpen(true)}
-          className="inline-flex items-center gap-2 px-4 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all"
+          className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all"
         >
           <Printer className="w-4 h-4" />
           <span>Print Payslip / PDF</span>
@@ -73,61 +67,61 @@ export const PayslipDetailPage: React.FC = () => {
       </div>
 
       {/* Main Statement Container */}
-      <div className="rounded-3xl border border-slate-800 bg-slate-900 shadow-2xl p-8 space-y-6">
+      <div className="rounded-xl border border-border bg-card text-card-foreground shadow-sm p-8 space-y-6">
         {/* Statement Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-slate-800">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-6 border-b border-border">
           <div>
-            <div className="flex items-center gap-2 mb-1">
-              <span className="text-xs font-bold uppercase tracking-wider text-brand-400 font-mono">
+            <div className="flex items-center gap-2 mb-1.5">
+              <span className="text-[11px] font-bold uppercase tracking-wider text-primary font-mono">
                 PeoplePay360 Salary Slip
               </span>
               <StatusBadge status={payslip.status} size="sm" />
             </div>
-            <h1 className="text-2xl font-black text-white tracking-tight">
+            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
               {payslip.employee?.name}
             </h1>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-muted-foreground mt-0.5">
               {payslip.employee?.jobPosition?.title || 'Staff Associate'} — {payslip.employee?.department?.name || 'General'}
             </p>
           </div>
 
-          <div className="text-left sm:text-right font-mono text-xs text-slate-400 space-y-1">
-            <div>Payrun: <strong className="text-white">{payslip.payrun?.name}</strong></div>
+          <div className="text-left sm:text-right font-mono text-xs text-muted-foreground space-y-1">
+            <div>Payrun: <strong className="text-foreground">{payslip.payrun?.name}</strong></div>
             <div>Period: <strong>{formatDate(payslip.periodStart)}</strong> to <strong>{formatDate(payslip.periodEnd)}</strong></div>
-            <div>Worked Days: <strong className="text-emerald-400">{Number(payslip.workedDays)} days</strong></div>
+            <div>Worked Days: <strong className="text-emerald-700 dark:text-emerald-400">{Number(payslip.workedDays)} days</strong></div>
           </div>
         </div>
 
         {/* Banking Snapshot */}
-        <div className="p-4 rounded-xl bg-slate-950 border border-slate-800/80 grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
+        <div className="p-4 rounded-lg bg-secondary border border-border grid grid-cols-2 sm:grid-cols-4 gap-4 text-xs font-mono">
           <div>
-            <span className="text-[10px] text-slate-500 uppercase block">Bank Name</span>
-            <span className="text-slate-200">{payslip.employee?.bankName || '—'}</span>
+            <span className="text-[10px] text-muted-foreground uppercase block">Bank Name</span>
+            <span className="text-foreground font-semibold">{payslip.employee?.bankName || '—'}</span>
           </div>
           <div>
-            <span className="text-[10px] text-slate-500 uppercase block">Account #</span>
-            <span className="text-slate-200">
+            <span className="text-[10px] text-muted-foreground uppercase block">Account #</span>
+            <span className="text-foreground font-semibold">
               {payslip.employee?.bankAccountNumber ? `**** ${payslip.employee.bankAccountNumber.slice(-4)}` : 'Missing'}
             </span>
           </div>
           <div>
-            <span className="text-[10px] text-slate-500 uppercase block">IFSC / Routing</span>
-            <span className="text-slate-200">{payslip.employee?.bankIfsc || '—'}</span>
+            <span className="text-[10px] text-muted-foreground uppercase block">IFSC / Routing</span>
+            <span className="text-foreground font-semibold">{payslip.employee?.bankIfsc || '—'}</span>
           </div>
           <div>
-            <span className="text-[10px] text-slate-500 uppercase block">Contract Wage</span>
-            <span className="text-white font-bold">{formatCurrency(payslip.contract?.wagePerMonth)}</span>
+            <span className="text-[10px] text-muted-foreground uppercase block">Contract Wage</span>
+            <span className="text-foreground font-bold">{formatCurrency(payslip.contract?.wagePerMonth)}</span>
           </div>
         </div>
 
         {/* Rule-by-rule breakdown table */}
         <div>
-          <div className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-3">
+          <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-3 font-serif">
             Itemized Salary Rule Breakdown
           </div>
-          <div className="rounded-xl border border-slate-800 overflow-hidden shadow-sm">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
+          <div className="rounded-lg border border-border overflow-hidden shadow-sm">
+            <table className="w-full text-left text-xs text-foreground">
+              <thead className="bg-secondary text-muted-foreground uppercase text-[10px] font-bold border-b border-border">
                 <tr>
                   <th className="px-5 py-3 w-16">Seq</th>
                   <th className="px-5 py-3 w-28">Code</th>
@@ -136,33 +130,33 @@ export const PayslipDetailPage: React.FC = () => {
                   <th className="px-5 py-3 text-right">Computed Amount</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-border bg-card">
                 {payslip.lines?.map((line: any) => {
                   const cat = line.category?.toLowerCase();
                   const isNegative = cat === 'deduction';
 
                   return (
-                    <tr key={line.id || line.code} className="hover:bg-slate-850/40 transition-colors">
-                      <td className="px-5 py-3 text-slate-500 font-mono">
+                    <tr key={line.id || line.code} className="hover:bg-secondary/40 transition-colors">
+                      <td className="px-5 py-3 text-muted-foreground font-mono">
                         {line.sequence}
                       </td>
-                      <td className="px-5 py-3 font-mono font-bold text-white">
+                      <td className="px-5 py-3 font-mono font-bold text-foreground">
                         {line.code}
                       </td>
-                      <td className="px-5 py-3 font-medium text-slate-200">
+                      <td className="px-5 py-3 font-medium text-foreground">
                         {line.label}
                       </td>
                       <td className="px-5 py-3">
-                        <span className={`tag-${cat} text-[10px] font-mono px-2 py-0.5 rounded-full font-bold uppercase`}>
+                        <span className={`tag-${cat} text-[10px] font-mono px-2.5 py-0.5 rounded-full font-bold uppercase`}>
                           {line.category}
                         </span>
                       </td>
                       <td className={`px-5 py-3 text-right font-mono font-bold text-sm ${
                         cat === 'net'
-                          ? 'text-emerald-400 font-extrabold text-base'
+                          ? 'text-primary font-black text-base'
                           : isNegative
-                          ? 'text-rose-400'
-                          : 'text-white'
+                          ? 'text-rose-700 dark:text-rose-400'
+                          : 'text-foreground'
                       }`}>
                         {isNegative ? `-${formatCurrency(line.amount)}` : formatCurrency(line.amount)}
                       </td>
@@ -175,18 +169,18 @@ export const PayslipDetailPage: React.FC = () => {
         </div>
 
         {/* Totals Summary Box */}
-        <div className="ml-auto w-full sm:w-80 p-5 rounded-2xl bg-slate-950 border border-slate-800 space-y-2 text-xs">
-          <div className="flex justify-between py-1 border-b border-slate-800">
-            <span className="text-slate-400">Total Gross Earnings:</span>
-            <span className="font-mono font-bold text-white">{formatCurrency(payslip.grossSalary)}</span>
+        <div className="ml-auto w-full sm:w-80 p-5 rounded-lg bg-secondary border border-border space-y-2 text-xs">
+          <div className="flex justify-between py-1 border-b border-border">
+            <span className="text-muted-foreground">Total Gross Earnings:</span>
+            <span className="font-mono font-bold text-foreground">{formatCurrency(payslip.grossSalary)}</span>
           </div>
-          <div className="flex justify-between py-1 border-b border-slate-800">
-            <span className="text-slate-400">Total Deductions:</span>
-            <span className="font-mono font-bold text-rose-400">-{formatCurrency(totalDeductions)}</span>
+          <div className="flex justify-between py-1 border-b border-border">
+            <span className="text-muted-foreground">Total Deductions:</span>
+            <span className="font-mono font-bold text-rose-700 dark:text-rose-400">-{formatCurrency(totalDeductions)}</span>
           </div>
-          <div className="flex justify-between pt-2 text-base font-black">
-            <span className="text-white">Net Take-Home Pay:</span>
-            <span className="font-mono text-emerald-400">{formatCurrency(payslip.netSalary)}</span>
+          <div className="flex justify-between pt-2 text-base font-bold">
+            <span className="font-serif text-foreground">Net Take-Home Pay:</span>
+            <span className="font-mono text-primary font-black text-lg">{formatCurrency(payslip.netSalary)}</span>
           </div>
         </div>
       </div>

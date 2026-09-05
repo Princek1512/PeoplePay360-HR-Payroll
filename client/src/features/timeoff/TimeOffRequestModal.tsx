@@ -80,13 +80,13 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Time Off Type
           </label>
           <select
             value={timeOffTypeId}
             onChange={(e) => setTimeOffTypeId(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             required
           >
             {types.map((t) => (
@@ -99,34 +99,34 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               End Date
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               required
             />
           </div>
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Duration (Days / Hours)
           </label>
           <input
@@ -135,13 +135,13 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
             min="0.5"
             value={durationAmount}
             onChange={(e) => setDurationAmount(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
             required
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Reason for Leave
           </label>
           <textarea
@@ -149,22 +149,22 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
             value={reason}
             onChange={(e) => setReason(e.target.value)}
             placeholder="Provide context for manager review..."
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           />
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
           >
             {loading ? 'Submitting...' : 'Submit Request'}
           </button>

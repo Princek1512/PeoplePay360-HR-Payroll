@@ -108,17 +108,17 @@ export const Sidebar: React.FC = () => {
   ];
 
   return (
-    <aside className="w-64 bg-slate-900 border-r border-slate-800 flex flex-col shrink-0 h-screen sticky top-0 select-none">
+    <aside className="w-64 bg-card text-card-foreground border-r border-border flex flex-col shrink-0 h-screen sticky top-0 select-none">
       {/* Brand Header */}
-      <div className="h-16 flex items-center px-6 gap-3 border-b border-slate-800 bg-slate-900/50">
-        <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-brand-600 to-indigo-500 flex items-center justify-center text-white font-black text-lg shadow-lg shadow-brand-500/20">
+      <div className="h-16 flex items-center px-6 gap-3 border-b border-border bg-card">
+        <div className="w-9 h-9 rounded-md bg-primary flex items-center justify-center text-primary-foreground font-serif font-bold text-lg shadow-sm">
           360
         </div>
         <div>
-          <h1 className="font-extrabold text-sm tracking-tight text-white flex items-center gap-1.5 font-mono">
-            PeoplePay<span className="text-brand-400">360</span>
+          <h1 className="font-bold text-sm tracking-tight text-foreground flex items-center gap-1.5 font-serif">
+            PeoplePay<span className="text-primary opacity-80">360</span>
           </h1>
-          <span className="text-[10px] font-semibold text-slate-400 tracking-wider uppercase block">
+          <span className="text-[10px] font-medium text-muted-foreground tracking-wider uppercase block">
             HR & Payroll Platform
           </span>
         </div>
@@ -132,7 +132,7 @@ export const Sidebar: React.FC = () => {
 
           return (
             <div key={group.title} className="space-y-1">
-              <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-slate-400">
+              <div className="px-3 text-[10px] font-bold uppercase tracking-wider text-muted-foreground">
                 {group.title}
               </div>
               {visibleItems.map((item) => (
@@ -140,10 +140,10 @@ export const Sidebar: React.FC = () => {
                   key={item.to}
                   to={item.to}
                   className={({ isActive }) =>
-                    `group flex items-center justify-between px-3 py-2 rounded-xl text-xs font-semibold transition-all duration-150 ${
+                    `group flex items-center justify-between px-3 py-2 rounded-md text-xs font-medium transition-colors ${
                       isActive
-                        ? 'bg-brand-600 text-white shadow-md shadow-brand-600/30'
-                        : 'text-slate-400 hover:text-slate-200 hover:bg-slate-800/60'
+                        ? 'bg-primary text-primary-foreground shadow-sm'
+                        : 'text-muted-foreground hover:text-foreground hover:bg-secondary'
                     }`
                   }
                 >
@@ -152,14 +152,14 @@ export const Sidebar: React.FC = () => {
                       <div className="flex items-center gap-2.5">
                         <item.icon
                           className={`w-4 h-4 transition-colors ${
-                            isActive ? 'text-white' : 'text-slate-400 group-hover:text-slate-300'
+                            isActive ? 'text-primary-foreground' : 'text-muted-foreground group-hover:text-foreground'
                           }`}
                         />
                         <span>{item.name}</span>
                       </div>
                       <ChevronRight
                         className={`w-3.5 h-3.5 opacity-0 group-hover:opacity-100 transition-opacity ${
-                          isActive ? 'opacity-100 text-brand-200' : 'text-slate-400'
+                          isActive ? 'opacity-100 text-primary-foreground' : 'text-muted-foreground'
                         }`}
                       />
                     </>
@@ -172,8 +172,8 @@ export const Sidebar: React.FC = () => {
       </div>
 
       {/* Footer system status */}
-      <div className="p-3 border-t border-slate-800/80 bg-slate-950/40">
-        <div className="flex items-center gap-2 px-2 py-1 text-[11px] text-slate-400">
+      <div className="p-3 border-t border-border bg-card">
+        <div className="flex items-center gap-2 px-2 py-1 text-[11px] text-muted-foreground">
           <span className="w-2 h-2 rounded-full bg-emerald-500 live-dot" />
           <span>System Connected & Operational</span>
         </div>

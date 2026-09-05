@@ -102,14 +102,14 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Employee
           </label>
           <select
             value={employeeId}
             onChange={(e) => setEmployeeId(e.target.value)}
             disabled={!!contractToEdit}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 disabled:opacity-50"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring disabled:opacity-50"
             required
           >
             <option value="">-- Select Employee --</option>
@@ -123,34 +123,34 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Start Date
             </label>
             <input
               type="date"
               value={startDate}
               onChange={(e) => setStartDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               End Date (Optional)
             </label>
             <input
               type="date"
               value={endDate}
               onChange={(e) => setEndDate(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
             />
           </div>
         </div>
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Monthly Wage ($)
             </label>
             <input
@@ -159,19 +159,19 @@ export const ContractModal: React.FC<ContractModalProps> = ({
               value={wagePerMonth}
               onChange={(e) => setWagePerMonth(e.target.value)}
               placeholder="e.g. 7500.00"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Contract Status
             </label>
             <select
               value={status}
               onChange={(e) => setStatus(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="running">Running (Active)</option>
               <option value="draft">Draft</option>
@@ -182,13 +182,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
 
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Salary Structure
             </label>
             <select
               value={salaryStructureId}
               onChange={(e) => setSalaryStructureId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="">-- Default Structure --</option>
               {structures.map((s) => (
@@ -200,13 +200,13 @@ export const ContractModal: React.FC<ContractModalProps> = ({
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Working Schedule
             </label>
             <select
               value={workingScheduleId}
               onChange={(e) => setWorkingScheduleId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="">-- Match Employee Schedule --</option>
               {schedules.map((s) => (
@@ -218,18 +218,18 @@ export const ContractModal: React.FC<ContractModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
           >
             {loading ? 'Validating...' : contractToEdit ? 'Save Changes' : 'Create Contract'}
           </button>

@@ -146,16 +146,16 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
       )}
 
       {/* Stepper indicator */}
-      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-slate-800">
-        <div className={`flex items-center gap-2 text-xs font-bold ${step === 1 ? 'text-brand-400' : 'text-slate-400'}`}>
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+      <div className="flex items-center gap-3 mb-6 pb-4 border-b border-border">
+        <div className={`flex items-center gap-2 text-xs font-semibold ${step === 1 ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 1 ? 'bg-primary text-primary-foreground font-bold' : 'bg-secondary text-muted-foreground'}`}>
             1
           </span>
           <span>Period & Structure</span>
         </div>
-        <div className="w-8 h-px bg-slate-800" />
-        <div className={`flex items-center gap-2 text-xs font-bold ${step === 2 ? 'text-brand-400' : 'text-slate-400'}`}>
-          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-brand-600 text-white' : 'bg-slate-800 text-slate-400'}`}>
+        <div className="w-8 h-px bg-border" />
+        <div className={`flex items-center gap-2 text-xs font-semibold ${step === 2 ? 'text-primary' : 'text-muted-foreground'}`}>
+          <span className={`w-5 h-5 rounded-full flex items-center justify-center text-[10px] ${step === 2 ? 'bg-primary text-primary-foreground font-bold' : 'bg-secondary text-muted-foreground'}`}>
             2
           </span>
           <span>Select Eligible Records</span>
@@ -163,28 +163,28 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
       </div>
 
       {step === 1 ? (
-        <form onSubmit={handleContinueToStep2} className="space-y-4">
+        <form onSubmit={handleContinueToStep2} className="space-y-4 font-sans">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Pay Run Name
             </label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Salary Structure
             </label>
             <select
               value={salaryStructureId}
               onChange={(e) => setSalaryStructureId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               required
             >
               {structures.map((s) => (
@@ -197,44 +197,44 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 Period Start Date
               </label>
               <input
                 type="date"
                 value={periodStart}
                 onChange={(e) => setPeriodStart(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
                 required
               />
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+              <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
                 Period End Date
               </label>
               <input
                 type="date"
                 value={periodEnd}
                 onChange={(e) => setPeriodEnd(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+                className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
                 required
               />
             </div>
           </div>
 
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
               Discard
             </button>
             <button
               type="submit"
               disabled={loading}
-              className="inline-flex items-center gap-2 px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
             >
               {loading ? 'Finding Records...' : (
                 <>
@@ -247,24 +247,24 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
         </form>
       ) : (
         /* Step 2 Employee Selection */
-        <div className="space-y-4">
+        <div className="space-y-4 font-sans">
           <div className="flex items-center justify-between pb-2">
-            <span className="text-xs text-slate-400 font-semibold">
+            <span className="text-xs text-muted-foreground font-medium">
               {selectedEmpIds.length} of {eligibleEmployees.length} employees selected
             </span>
             <button
               type="button"
               onClick={toggleSelectAll}
-              className="text-xs text-brand-400 hover:text-brand-300 font-semibold"
+              className="text-xs text-primary hover:underline font-medium"
             >
               {selectedEmpIds.length === eligibleEmployees.length ? 'Deselect All' : 'Select All'}
             </button>
           </div>
 
           {/* Table */}
-          <div className="rounded-xl border border-slate-800 overflow-hidden max-h-80 overflow-y-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800 sticky top-0">
+          <div className="rounded-md border border-border overflow-hidden max-h-80 overflow-y-auto">
+            <table className="w-full text-left text-xs text-foreground">
+              <thead className="bg-secondary text-muted-foreground uppercase text-[10px] font-bold border-b border-border sticky top-0">
                 <tr>
                   <th className="px-4 py-2.5 w-8"></th>
                   <th className="px-4 py-2.5">Employee</th>
@@ -274,7 +274,7 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
                   <th className="px-4 py-2.5">Warning Alerts</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-border bg-card">
                 {eligibleEmployees.map((emp) => {
                   const isChecked = selectedEmpIds.includes(emp.id);
 
@@ -283,7 +283,7 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
                       key={emp.id}
                       onClick={() => toggleSelectEmployee(emp.id)}
                       className={`cursor-pointer transition-colors ${
-                        isChecked ? 'bg-brand-950/20' : 'opacity-60 hover:opacity-100'
+                        isChecked ? 'bg-secondary' : 'hover:bg-secondary/40'
                       }`}
                     >
                       <td className="px-4 py-3">
@@ -291,27 +291,27 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
                           type="checkbox"
                           checked={isChecked}
                           onChange={() => {}}
-                          className="rounded border-slate-700 text-brand-600"
+                          className="rounded border-input text-primary"
                         />
                       </td>
-                      <td className="px-4 py-3 font-bold text-white">
+                      <td className="px-4 py-3 font-bold text-foreground">
                         {emp.name}
                       </td>
-                      <td className="px-4 py-3">{emp.department}</td>
-                      <td className="px-4 py-3 font-mono font-bold text-slate-200">
+                      <td className="px-4 py-3 text-muted-foreground">{emp.department}</td>
+                      <td className="px-4 py-3 font-mono font-bold text-foreground">
                         {formatCurrency(emp.wagePerMonth)}
                       </td>
-                      <td className="px-4 py-3 font-mono text-slate-400">
+                      <td className="px-4 py-3 font-mono text-muted-foreground">
                         {emp.weeklyHours}h
                       </td>
                       <td className="px-4 py-3">
                         {emp.hasWarning ? (
-                          <div className="flex items-center gap-1 text-amber-400 text-[11px]">
+                          <div className="flex items-center gap-1 text-amber-600 dark:text-amber-400 text-[11px]">
                             <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                             <span className="truncate max-w-[160px]">{emp.warnings[0]}</span>
                           </div>
                         ) : (
-                          <span className="text-emerald-400 text-[11px] flex items-center gap-1 font-semibold">
+                          <span className="text-emerald-600 dark:text-emerald-400 text-[11px] flex items-center gap-1 font-semibold">
                             <Check className="w-3.5 h-3.5" />
                             Ready
                           </span>
@@ -324,11 +324,11 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
             </table>
           </div>
 
-          <div className="flex items-center justify-between pt-4 border-t border-slate-800">
+          <div className="flex items-center justify-between pt-4 border-t border-border">
             <button
               type="button"
               onClick={() => setStep(1)}
-              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+              className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
             >
               <ArrowLeft className="w-4 h-4" />
               <span>Back</span>
@@ -338,7 +338,7 @@ export const PayrunWizardModal: React.FC<PayrunWizardModalProps> = ({
               type="button"
               onClick={handleCreatePayrun}
               disabled={loading || selectedEmpIds.length === 0}
-              className="inline-flex items-center gap-2 px-5 py-2.5 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-lg shadow-brand-600/30 transition-all disabled:opacity-50"
+              className="inline-flex items-center gap-2 px-4 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
             >
               {loading ? 'Creating Payrun...' : `Create Payrun (${selectedEmpIds.length} Employees)`}
             </button>

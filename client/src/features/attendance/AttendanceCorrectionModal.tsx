@@ -7,14 +7,17 @@ interface AttendanceCorrectionModalProps {
   onClose: () => void;
   onSuccess: () => void;
   recordToEdit?: any | null;
+  attendance?: any | null;
 }
 
 export const AttendanceCorrectionModal: React.FC<AttendanceCorrectionModalProps> = ({
   isOpen,
   onClose,
   onSuccess,
-  recordToEdit
+  recordToEdit,
+  attendance
 }) => {
+  const activeRecord = recordToEdit || attendance;
   const [checkIn, setCheckIn] = useState('');
   const [checkOut, setCheckOut] = useState('');
   const [status, setStatus] = useState('normal');
@@ -22,23 +25,23 @@ export const AttendanceCorrectionModal: React.FC<AttendanceCorrectionModalProps>
   const [error, setError] = useState<string | null>(null);
 
   useEffect(() => {
-    if (isOpen && recordToEdit) {
-      setCheckIn(recordToEdit.checkIn ? new Date(recordToEdit.checkIn).toISOString().slice(0, 16) : '');
-      setCheckOut(recordToEdit.checkOut ? new Date(recordToEdit.checkOut).toISOString().slice(0, 16) : '');
-      setStatus(recordToEdit.status || 'normal');
+    if (isOpen && activeRecord) {
+      setCheckIn(activeRecord.checkIn ? new Date(activeRecord.checkIn).toISOString().slice(0, 16) : '');
+      setCheckOut(activeRecord.checkOut ? new Date(activeRecord.checkOut).toISOString().slice(0, 16) : '');
+      setStatus(activeRecord.status || 'normal');
       setError(null);
     }
-  }, [isOpen, recordToEdit]);
+  }, [isOpen, activeRecord]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!recordToEdit) return;
+    if (!activeRecord) return;
 
     setLoading(true);
     setError(null);
 
     try {
-      await apiClient.patch(`/attendance/${recordToEdit.id}`, {
+      await apiClient.patch(`/attendance/${activeRecord.id}`, {
         checkIn: checkIn ? new Date(checkIn).toISOString() : undefined,
         checkOut: checkOut ? new Date(checkOut).toISOString() : undefined,
         status
@@ -68,60 +71,60 @@ export const AttendanceCorrectionModal: React.FC<AttendanceCorrectionModalProps>
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Check-In Timestamp
           </label>
           <input
             type="datetime-local"
             value={checkIn}
             onChange={(e) => setCheckIn(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
             required
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Check-Out Timestamp
           </label>
           <input
             type="datetime-local"
             value={checkOut}
             onChange={(e) => setCheckOut(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500 font-mono"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
           />
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+          <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
             Attendance Flag / Exception Status
           </label>
           <select
             value={status}
             onChange={(e) => setStatus(e.target.value)}
-            className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
           >
             <option value="normal">Normal</option>
             <option value="exception">Exception (Late / Overtime / System Adjustment)</option>
           </select>
         </div>
 
-        <div className="p-3 rounded-xl bg-slate-950 border border-slate-800 text-[11px] text-slate-400">
+        <div className="p-3 rounded-md bg-secondary/80 border border-border text-[11px] text-muted-foreground">
           Note: This manual edit will record your user identity and timestamp as the auditor.
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : 'Apply Correction'}
           </button>

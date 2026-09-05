@@ -140,7 +140,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
       <form onSubmit={handleSubmit} className="space-y-5">
         <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Schedule Name
             </label>
             <input
@@ -148,19 +148,19 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
               value={name}
               onChange={(e) => setName(e.target.value)}
               placeholder="e.g. Standard 40h Work Week"
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
               required
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 mb-1 uppercase tracking-wider">
+            <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
               Calendar Type
             </label>
             <select
               value={calendarType}
               onChange={(e) => setCalendarType(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-700 rounded-xl px-3.5 py-2 text-sm text-white focus:outline-none focus:border-brand-500"
+              className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
             >
               <option value="standard">Standard Full-Time</option>
               <option value="flexible">Flexible / Remote</option>
@@ -170,23 +170,23 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
         </div>
 
         {/* Live derived hours readout banner */}
-        <div className="p-4 rounded-xl bg-brand-950/40 border border-brand-800/40 flex items-center justify-between">
-          <span className="text-xs font-medium text-slate-300">
+        <div className="p-4 rounded-md bg-secondary border border-border flex items-center justify-between">
+          <span className="text-xs font-medium text-muted-foreground">
             Total Auto-Derived Weekly Hours:
           </span>
-          <span className="text-lg font-bold text-brand-400 font-mono">
+          <span className="text-lg font-bold text-primary font-mono">
             {computedTotalWeeklyHours} hrs / week
           </span>
         </div>
 
         {/* Weekly Grid */}
         <div className="space-y-2">
-          <label className="block text-xs font-bold uppercase tracking-wider text-slate-400 mb-2">
+          <label className="block text-xs font-bold uppercase tracking-wider text-muted-foreground mb-2">
             Weekly Shift Grid & Breaks
           </label>
-          <div className="rounded-xl border border-slate-800 overflow-hidden">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
+          <div className="rounded-md border border-border overflow-hidden">
+            <table className="w-full text-left text-xs text-foreground">
+              <thead className="bg-secondary text-muted-foreground uppercase text-[10px] font-bold border-b border-border">
                 <tr>
                   <th className="px-4 py-2.5">Working Day</th>
                   <th className="px-4 py-2.5">Start Time</th>
@@ -194,7 +194,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                   <th className="px-4 py-2.5">Break (Mins)</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
+              <tbody className="divide-y divide-border bg-card">
                 {days.map((d) => (
                   <tr key={d.dayOfWeek} className={d.active ? '' : 'opacity-40'}>
                     <td className="px-4 py-2 flex items-center gap-2">
@@ -202,9 +202,9 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         type="checkbox"
                         checked={d.active}
                         onChange={(e) => updateDay(d.dayOfWeek, 'active', e.target.checked)}
-                        className="rounded border-slate-700 text-brand-600"
+                        className="rounded border-input text-primary"
                       />
-                      <span className="font-semibold text-white">{d.dayName}</span>
+                      <span className="font-semibold text-foreground">{d.dayName}</span>
                     </td>
                     <td className="px-4 py-2">
                       <input
@@ -212,7 +212,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         value={d.startTime}
                         disabled={!d.active}
                         onChange={(e) => updateDay(d.dayOfWeek, 'startTime', e.target.value)}
-                        className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white font-mono"
+                        className="bg-background border border-input rounded-md px-2 py-1 text-xs text-foreground font-mono disabled:opacity-50"
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -221,7 +221,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         value={d.endTime}
                         disabled={!d.active}
                         onChange={(e) => updateDay(d.dayOfWeek, 'endTime', e.target.value)}
-                        className="bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white font-mono"
+                        className="bg-background border border-input rounded-md px-2 py-1 text-xs text-foreground font-mono disabled:opacity-50"
                       />
                     </td>
                     <td className="px-4 py-2">
@@ -232,7 +232,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                         value={d.breakMinutes}
                         disabled={!d.active}
                         onChange={(e) => updateDay(d.dayOfWeek, 'breakMinutes', Number(e.target.value))}
-                        className="w-16 bg-slate-950 border border-slate-800 rounded-lg px-2 py-1 text-xs text-white font-mono"
+                        className="w-16 bg-background border border-input rounded-md px-2 py-1 text-xs text-foreground font-mono disabled:opacity-50"
                       />
                     </td>
                   </tr>
@@ -242,18 +242,18 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
           </div>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-slate-800">
+        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
           <button
             type="button"
             onClick={onClose}
-            className="px-4 py-2 rounded-xl text-xs font-semibold text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
+            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
           >
             Cancel
           </button>
           <button
             type="submit"
             disabled={loading}
-            className="px-5 py-2 rounded-xl bg-brand-600 hover:bg-brand-500 text-white text-xs font-semibold shadow-md shadow-brand-600/30 transition-all disabled:opacity-50"
+            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
           >
             {loading ? 'Saving...' : scheduleToEdit ? 'Save Schedule' : 'Create Schedule'}
           </button>

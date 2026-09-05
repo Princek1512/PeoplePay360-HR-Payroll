@@ -5,16 +5,12 @@ import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatCurrency, formatDate } from '../../lib/formatters';
 import { useAuth } from '../../context/AuthContext';
 import {
-  CircleDollarSign,
   ArrowLeft,
   Play,
   CheckCircle2,
   Lock,
   Mail,
   AlertTriangle,
-  ReceiptText,
-  Building,
-  User,
   ExternalLink
 } from 'lucide-react';
 
@@ -101,11 +97,11 @@ export const PayrunDetailPage: React.FC = () => {
   };
 
   if (loading) {
-    return <div className="p-8 text-center text-slate-500">Loading payrun details...</div>;
+    return <div className="p-8 text-center text-muted-foreground">Loading payrun details...</div>;
   }
 
   if (!payrun) {
-    return <div className="p-8 text-center text-rose-400">Payrun not found.</div>;
+    return <div className="p-8 text-center text-destructive">Payrun not found.</div>;
   }
 
   const isDraft = payrun.status === 'draft';
@@ -114,12 +110,12 @@ export const PayrunDetailPage: React.FC = () => {
   const isPaid = payrun.status === 'paid';
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 font-sans">
       {/* Back button */}
       <div className="flex items-center justify-between">
         <button
           onClick={() => navigate('/payruns')}
-          className="inline-flex items-center gap-2 text-xs font-semibold text-slate-400 hover:text-white transition-colors"
+          className="inline-flex items-center gap-2 text-xs font-medium text-muted-foreground hover:text-foreground transition-colors"
         >
           <ArrowLeft className="w-4 h-4" />
           <span>Back to Payrun Archive</span>
@@ -129,17 +125,17 @@ export const PayrunDetailPage: React.FC = () => {
       </div>
 
       {/* Header Info Banner */}
-      <div className="p-6 rounded-3xl bg-slate-900 border border-slate-800 shadow-xl flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="p-6 rounded-xl bg-card border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div>
-          <h1 className="text-2xl font-bold text-white tracking-tight">{payrun.name}</h1>
-          <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-2 font-mono">
-            <span>Structure: <strong className="text-brand-400">{payrun.salaryStructure?.name}</strong></span>
+          <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">{payrun.name}</h1>
+          <div className="flex flex-wrap items-center gap-4 text-xs text-muted-foreground mt-2 font-mono">
+            <span>Structure: <strong className="text-primary">{payrun.salaryStructure?.name}</strong></span>
             <span>Period: <strong>{formatDate(payrun.periodStart)}</strong> to <strong>{formatDate(payrun.periodEnd)}</strong></span>
             <span>Total Records: <strong>{payrun.totalEmployees}</strong></span>
           </div>
         </div>
 
-        {/* Linear Action Bar (§8 & §9: Compute -> Validate -> Mark Paid -> Send Payslips) */}
+        {/* Linear Action Bar */}
         <div className="flex flex-wrap items-center gap-2.5">
           {can('payruns', 'update') && (
             <>
@@ -147,10 +143,10 @@ export const PayrunDetailPage: React.FC = () => {
               <button
                 onClick={handleCompute}
                 disabled={actionLoading || isPaid}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm ${
                   isDraft
-                    ? 'bg-brand-600 hover:bg-brand-500 text-white shadow-brand-600/30'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
                 } disabled:opacity-50`}
               >
                 <Play className="w-3.5 h-3.5 fill-current" />
@@ -161,10 +157,10 @@ export const PayrunDetailPage: React.FC = () => {
               <button
                 onClick={handleValidate}
                 disabled={actionLoading || (!isComputed && !isDraft) || isPaid || isValidated}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm ${
                   isComputed
-                    ? 'bg-indigo-600 hover:bg-indigo-500 text-white shadow-indigo-600/30'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                    ? 'bg-primary hover:bg-primary/90 text-primary-foreground'
+                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
                 } disabled:opacity-50`}
               >
                 <CheckCircle2 className="w-3.5 h-3.5" />
@@ -175,10 +171,10 @@ export const PayrunDetailPage: React.FC = () => {
               <button
                 onClick={handleMarkPaid}
                 disabled={actionLoading || !isValidated || isPaid}
-                className={`inline-flex items-center gap-1.5 px-4 py-2 rounded-xl text-xs font-semibold transition-all shadow-md ${
+                className={`inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md text-xs font-medium transition-all shadow-sm ${
                   isValidated
-                    ? 'bg-emerald-600 hover:bg-emerald-500 text-white shadow-emerald-600/30'
-                    : 'bg-slate-800 hover:bg-slate-700 text-slate-300'
+                    ? 'bg-emerald-700 hover:bg-emerald-800 text-white'
+                    : 'bg-secondary hover:bg-secondary/80 text-foreground'
                 } disabled:opacity-50`}
               >
                 <Lock className="w-3.5 h-3.5" />
@@ -189,7 +185,7 @@ export const PayrunDetailPage: React.FC = () => {
               <button
                 onClick={handleSendPayslips}
                 disabled={actionLoading || (!isPaid && !isValidated)}
-                className="inline-flex items-center gap-1.5 px-4 py-2 rounded-xl bg-slate-800 hover:bg-slate-700 text-slate-200 text-xs font-semibold border border-slate-700 transition-colors disabled:opacity-50"
+                className="inline-flex items-center gap-1.5 px-3.5 py-2 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs font-medium border border-border transition-colors disabled:opacity-50"
               >
                 <Mail className="w-3.5 h-3.5" />
                 <span>Send Payslips</span>
@@ -201,23 +197,23 @@ export const PayrunDetailPage: React.FC = () => {
 
       {/* Action progress readout */}
       {actionMessage && (
-        <div className="p-3 rounded-xl bg-brand-950/40 border border-brand-800/40 text-brand-300 text-xs flex items-center gap-2">
-          <span className="w-2 h-2 rounded-full bg-brand-400 live-dot" />
+        <div className="p-3 rounded-lg bg-secondary border border-border text-foreground text-xs flex items-center gap-2">
+          <span className="w-2 h-2 rounded-full bg-primary live-dot" />
           <span>{actionMessage}</span>
         </div>
       )}
 
       {/* Blocking Warnings Banner */}
       {payrun.hasBlockingWarnings && (
-        <div className="p-5 rounded-2xl bg-amber-500/10 border border-amber-500/30 text-amber-300">
+        <div className="p-5 rounded-lg bg-amber-500/10 border border-amber-500/30 text-amber-900 dark:text-amber-200">
           <div className="flex items-center gap-2 font-bold text-sm mb-2">
-            <AlertTriangle className="w-4 h-4 text-amber-400" />
+            <AlertTriangle className="w-4 h-4 text-amber-600 dark:text-amber-400" />
             <span>Blocking Warnings Detected</span>
           </div>
-          <p className="text-xs text-amber-200/80 mb-3">
+          <p className="text-xs mb-3 text-muted-foreground">
             The following issues will prevent this payrun from being validated or marked paid:
           </p>
-          <ul className="space-y-1 text-xs font-mono list-disc list-inside text-amber-300">
+          <ul className="space-y-1 text-xs font-mono list-disc list-inside">
             {payrun.blockingWarnings?.map((w: string, idx: number) => (
               <li key={idx}>{w}</li>
             ))}
@@ -227,20 +223,20 @@ export const PayrunDetailPage: React.FC = () => {
 
       {/* Summary KPI Counters */}
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Gross Earnings</span>
-          <div className="text-xl font-bold text-white mt-1 font-mono">{formatCurrency(payrun.totalGross)}</div>
+        <div className="p-5 rounded-xl bg-card border border-border shadow-sm">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Gross Earnings</span>
+          <div className="text-xl font-bold text-foreground mt-1 font-mono">{formatCurrency(payrun.totalGross)}</div>
         </div>
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Net Take-Home</span>
-          <div className="text-xl font-bold text-emerald-400 mt-1 font-mono">{formatCurrency(payrun.totalNet)}</div>
+        <div className="p-5 rounded-xl bg-card border border-border shadow-sm">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Total Net Take-Home</span>
+          <div className="text-xl font-bold text-emerald-700 dark:text-emerald-400 mt-1 font-mono">{formatCurrency(payrun.totalNet)}</div>
         </div>
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Eligible Employees</span>
-          <div className="text-xl font-bold text-white mt-1 font-mono">{payrun.totalEmployees}</div>
+        <div className="p-5 rounded-xl bg-card border border-border shadow-sm">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Eligible Employees</span>
+          <div className="text-xl font-bold text-foreground mt-1 font-mono">{payrun.totalEmployees}</div>
         </div>
-        <div className="p-5 rounded-2xl bg-slate-900 border border-slate-800">
-          <span className="text-xs font-semibold text-slate-400 uppercase tracking-wider">Run Status</span>
+        <div className="p-5 rounded-xl bg-card border border-border shadow-sm">
+          <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">Run Status</span>
           <div className="mt-1">
             <StatusBadge status={payrun.status} size="sm" />
           </div>
@@ -248,19 +244,19 @@ export const PayrunDetailPage: React.FC = () => {
       </div>
 
       {/* Payslips Table */}
-      <div className="rounded-2xl border border-slate-800 bg-slate-900/60 overflow-hidden shadow-xl">
-        <div className="px-6 py-4 border-b border-slate-800 bg-slate-950/60 flex items-center justify-between">
-          <h3 className="text-sm font-bold uppercase tracking-wider text-slate-200">
+      <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
+        <div className="px-6 py-4 border-b border-border bg-card flex items-center justify-between">
+          <h3 className="font-serif text-sm font-bold uppercase tracking-wider text-foreground">
             Included Employee Payslips
           </h3>
-          <span className="text-xs text-slate-400 font-mono">
+          <span className="text-xs text-muted-foreground font-mono">
             {payrun.payslips?.length || 0} Slips
           </span>
         </div>
 
         <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs text-slate-300">
-            <thead className="bg-slate-950/80 text-slate-400 uppercase tracking-wider text-[10px] font-bold border-b border-slate-800">
+          <table className="w-full text-left text-xs text-foreground">
+            <thead className="bg-secondary text-muted-foreground uppercase tracking-wider text-[10px] font-bold border-b border-border">
               <tr>
                 <th className="px-6 py-3.5">Employee</th>
                 <th className="px-6 py-3.5">Department</th>
@@ -272,26 +268,26 @@ export const PayrunDetailPage: React.FC = () => {
                 <th className="px-6 py-3.5 text-right">View Breakdown</th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-slate-800/60">
+            <tbody className="divide-y divide-border">
               {payrun.payslips?.map((slip: any) => (
                 <tr
                   key={slip.id}
                   onClick={() => navigate(`/payslips/${slip.id}`)}
-                  className="hover:bg-slate-850/40 cursor-pointer transition-colors"
+                  className="hover:bg-secondary/60 cursor-pointer transition-colors"
                 >
-                  <td className="px-6 py-4 font-bold text-white">
+                  <td className="px-6 py-4 font-bold text-foreground">
                     {slip.employee?.name}
                   </td>
-                  <td className="px-6 py-4 text-slate-400">
+                  <td className="px-6 py-4 text-muted-foreground">
                     {slip.employee?.department?.name || 'Staff'}
                   </td>
                   <td className="px-6 py-4 font-mono">
                     {Number(slip.workedDays)} days
                   </td>
-                  <td className="px-6 py-4 font-mono font-bold text-slate-200">
+                  <td className="px-6 py-4 font-mono font-bold text-foreground">
                     {formatCurrency(slip.grossSalary)}
                   </td>
-                  <td className="px-6 py-4 font-mono font-bold text-emerald-400 text-sm">
+                  <td className="px-6 py-4 font-mono font-bold text-emerald-700 dark:text-emerald-400 text-sm">
                     {formatCurrency(slip.netSalary)}
                   </td>
                   <td className="px-6 py-4">
@@ -299,16 +295,16 @@ export const PayrunDetailPage: React.FC = () => {
                   </td>
                   <td className="px-6 py-4">
                     {slip.hasWarning ? (
-                      <span className="text-amber-400 text-[11px] font-mono flex items-center gap-1">
+                      <span className="text-amber-600 dark:text-amber-400 text-[11px] font-mono flex items-center gap-1">
                         <AlertTriangle className="w-3.5 h-3.5 shrink-0" />
                         <span className="truncate max-w-[140px]">{slip.warningMessage}</span>
                       </span>
                     ) : (
-                      <span className="text-emerald-500 font-mono text-[11px]">Clear</span>
+                      <span className="text-emerald-600 dark:text-emerald-400 font-mono text-[11px]">Clear</span>
                     )}
                   </td>
                   <td className="px-6 py-4 text-right">
-                    <span className="text-brand-400 hover:text-brand-300 font-semibold inline-flex items-center gap-1">
+                    <span className="text-primary hover:underline font-medium inline-flex items-center gap-1">
                       Payslip
                       <ExternalLink className="w-3.5 h-3.5" />
                     </span>
