@@ -145,16 +145,18 @@ export const createRequest = async (req: Request, res: Response, next: NextFunct
       employeeId = req.user.employeeId;
     }
 
-    if (!employeeId || !timeOffTypeId || !startDate || !endDate || durationAmount === undefined) {
+    if (!employeeId || !timeOffTypeId || !startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        message: 'employeeId, timeOffTypeId, startDate, endDate, and durationAmount are required.'
+        message: 'employeeId, timeOffTypeId, startDate, and endDate are required.'
       });
     }
 
     const start = new Date(startDate);
     const end = new Date(endDate);
-    const duration = Number(durationAmount);
+    const duration = durationAmount !== undefined
+      ? Number(durationAmount)
+      : Math.max(1, Math.ceil(Math.abs(end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1);
 
     if (start > end) {
       return res.status(400).json({

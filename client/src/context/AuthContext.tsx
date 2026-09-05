@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import { apiClient } from '../lib/apiClient';
 import { hasPermission, PermissionAction } from '../lib/rbac';
+import { encryptPassword } from '../lib/crypto';
 
 export interface AuthEmployee {
   id: string;
@@ -54,7 +55,8 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
   }, []);
 
   const login = async (email: string, pass: string) => {
-    const res = await apiClient.post('/auth/login', { email, password: pass });
+    const encryptedPassword = encryptPassword(pass);
+    const res = await apiClient.post('/auth/login', { email, password: encryptedPassword });
     const { token: receivedToken, user: receivedUser } = res.data.data;
 
     setToken(receivedToken);

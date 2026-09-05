@@ -3,6 +3,7 @@ import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { prisma } from '../../config/db.js';
 import { env } from '../../config/env.js';
+import { decryptPassword } from '../../utils/crypto.js';
 
 export const login = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -33,7 +34,8 @@ export const login = async (req: Request, res: Response, next: NextFunction) => 
       return res.status(401).json({ success: false, message: 'Invalid credentials or inactive user account.' });
     }
 
-    const passwordValid = await bcrypt.compare(password, user.passwordHash);
+    const rawPassword = decryptPassword(password);
+    const passwordValid = await bcrypt.compare(rawPassword, user.passwordHash);
     if (!passwordValid) {
       return res.status(401).json({ success: false, message: 'Invalid credentials.' });
     }
