@@ -57,31 +57,31 @@ export const DashboardPage: React.FC = () => {
   const maxTrend = Math.max(...netTrend.map((t) => Math.max(t.grossSalary, t.netSalary)), 1);
 
   return (
-    <div className="space-y-8">
+    <div className="space-y-8 font-sans">
       {/* Header & Filter Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-slate-800">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
         <div>
           <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-brand-400" />
-            <h1 className="text-xl font-bold text-white tracking-tight">Executive Payroll Dashboard</h1>
+            <LayoutDashboard className="w-5 h-5 text-primary" />
+            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Executive Payroll Dashboard</h1>
           </div>
-          <p className="text-xs text-slate-400 mt-1">
-            Real-time live aggregation across Employees, Contracts, Working Schedules, Attendance, and Payruns.
+          <p className="text-xs text-muted-foreground mt-1">
+            Real-time live aggregation across Employees, Contracts, Schedules, Attendance, and Payruns.
           </p>
         </div>
 
         {/* Filter Bar */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-xl bg-slate-900 border border-slate-800 text-xs">
-            <Filter className="w-3.5 h-3.5 text-slate-400" />
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-card border border-border text-xs">
+            <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <select
               value={selectedDept}
               onChange={(e) => setSelectedDept(e.target.value)}
-              className="bg-transparent text-white focus:outline-none"
+              className="bg-transparent text-foreground focus:outline-none"
             >
-              <option value="" className="bg-slate-900">All Departments</option>
+              <option value="" className="bg-popover text-popover-foreground">All Departments</option>
               {departments.map((d) => (
-                <option key={d.id} value={d.id} className="bg-slate-900">
+                <option key={d.id} value={d.id} className="bg-popover text-popover-foreground">
                   {d.name}
                 </option>
               ))}
@@ -96,35 +96,35 @@ export const DashboardPage: React.FC = () => {
           title="Total Net Paid"
           value={formatCurrency(summary?.totalNetSalaryPaid)}
           subtitle="Validated & distributed"
-          icon={<DollarSign className="w-4 h-4 text-emerald-400" />}
+          icon={<DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
           variant="emerald"
         />
         <KpiCard
           title="Payslips Generated"
           value={`${summary?.payslipsGenerated?.total || 0} Total`}
           subtitle={`${summary?.payslipsGenerated?.paid || 0} Paid • ${summary?.payslipsGenerated?.done || 0} Done`}
-          icon={<ReceiptText className="w-4 h-4 text-blue-400" />}
+          icon={<ReceiptText className="w-4 h-4 text-primary" />}
           variant="brand"
         />
         <KpiCard
           title="Avg Salary / Employee"
           value={formatCurrency(summary?.avgSalaryPerEmployee)}
           subtitle={`${summary?.activeHeadcount || 0} active employees`}
-          icon={<Users className="w-4 h-4 text-indigo-400" />}
+          icon={<Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
           variant="indigo"
         />
         <KpiCard
           title="Approved Time Off"
           value={`${summary?.approvedTimeOffDays || 0} Days`}
           subtitle="Deducted from balance"
-          icon={<PlaneTakeoff className="w-4 h-4 text-amber-400" />}
+          icon={<PlaneTakeoff className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
           variant="amber"
         />
         <KpiCard
           title="Attendance Health"
           value={`${summary?.attendanceHealthPercent || 100}%`}
           subtitle="Normal vs exception logs"
-          icon={<Activity className="w-4 h-4 text-purple-400" />}
+          icon={<Activity className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
           variant="default"
         />
       </div>
@@ -132,18 +132,18 @@ export const DashboardPage: React.FC = () => {
       {/* Charts Row */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Chart 1: Salary Cost by Department */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Monthly Salary Cost by Department</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Aggregated contract wages by business unit</p>
+              <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Monthly Salary Cost by Department</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Aggregated contract wages by business unit</p>
             </div>
-            <Building className="w-4 h-4 text-brand-400" />
+            <Building className="w-4 h-4 text-primary" />
           </div>
 
           <div className="space-y-4 pt-2">
             {deptCosts.length === 0 ? (
-              <p className="text-xs text-slate-500 italic py-6 text-center">No department records available.</p>
+              <p className="text-xs text-muted-foreground italic py-6 text-center">No department records available.</p>
             ) : (
               deptCosts.map((d) => {
                 const pct = Math.min(100, Math.max(8, (d.salaryCost / maxDeptCost) * 100));
@@ -151,15 +151,15 @@ export const DashboardPage: React.FC = () => {
                 return (
                   <div key={d.departmentId} className="space-y-1.5">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-semibold text-slate-300">{d.department}</span>
+                      <span className="font-semibold text-foreground">{d.department}</span>
                       <div className="flex items-center gap-3 font-mono">
-                        <span className="text-slate-500 text-[11px]">{d.headcount} staff</span>
-                        <span className="font-bold text-white">{formatCurrency(d.salaryCost)}</span>
+                        <span className="text-muted-foreground text-[11px]">{d.headcount} staff</span>
+                        <span className="font-bold text-foreground">{formatCurrency(d.salaryCost)}</span>
                       </div>
                     </div>
-                    <div className="w-full h-3 rounded-full bg-slate-950 overflow-hidden">
+                    <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
                       <div
-                        className="h-full bg-gradient-to-r from-brand-600 to-indigo-500 rounded-full transition-all duration-500"
+                        className="h-full bg-primary rounded-full transition-all duration-500"
                         style={{ width: `${pct}%` }}
                       />
                     </div>
@@ -171,39 +171,36 @@ export const DashboardPage: React.FC = () => {
         </div>
 
         {/* Chart 2: Net Salary Trend */}
-        <div className="p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Monthly Net Salary Trend</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Historical payroll run distribution</p>
+              <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Monthly Net Salary Trend</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Historical payroll run distribution</p>
             </div>
-            <TrendingUp className="w-4 h-4 text-emerald-400" />
+            <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
           </div>
 
           <div className="space-y-4 pt-2">
             {netTrend.length === 0 ? (
-              <p className="text-xs text-slate-500 italic py-6 text-center">No payruns recorded yet.</p>
+              <p className="text-xs text-muted-foreground italic py-6 text-center">No payruns recorded yet.</p>
             ) : (
               netTrend.map((t, idx) => {
                 const pctNet = Math.min(100, Math.max(10, (t.netSalary / maxTrend) * 100));
-                const pctGross = Math.min(100, Math.max(10, (t.grossSalary / maxTrend) * 100));
 
                 return (
-                  <div key={idx} className="p-3 rounded-xl bg-slate-950 border border-slate-800/80 space-y-2">
+                  <div key={idx} className="p-3 rounded-lg bg-secondary border border-border space-y-2">
                     <div className="flex items-center justify-between text-xs">
-                      <span className="font-bold text-brand-300">{t.payrunName}</span>
+                      <span className="font-bold text-foreground">{t.payrunName}</span>
                       <div className="flex items-center gap-3 font-mono text-[11px]">
-                        <span className="text-slate-400">Gross: {formatCurrency(t.grossSalary)}</span>
-                        <span className="text-emerald-400 font-bold">Net: {formatCurrency(t.netSalary)}</span>
+                        <span className="text-muted-foreground">Gross: {formatCurrency(t.grossSalary)}</span>
+                        <span className="text-emerald-600 dark:text-emerald-400 font-bold">Net: {formatCurrency(t.netSalary)}</span>
                       </div>
                     </div>
-                    <div className="space-y-1">
-                      <div className="w-full h-2 rounded-full bg-slate-900 overflow-hidden">
-                        <div
-                          className="h-full bg-emerald-500 rounded-full transition-all duration-500"
-                          style={{ width: `${pctNet}%` }}
-                        />
-                      </div>
+                    <div className="w-full h-2 rounded-full bg-card overflow-hidden">
+                      <div
+                        className="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full transition-all duration-500"
+                        style={{ width: `${pctNet}%` }}
+                      />
                     </div>
                   </div>
                 );
@@ -216,83 +213,80 @@ export const DashboardPage: React.FC = () => {
       {/* Bottom Row: Active Alerts & Department Headcount Overview */}
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
         {/* Alerts Panel */}
-        <div className="lg:col-span-1 p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
-            <div className="flex items-center gap-2">
-              <AlertTriangle className="w-4 h-4 text-amber-400" />
-              <h3 className="text-sm font-bold text-white tracking-tight">Active Payroll Alerts</h3>
+        <div className="lg:col-span-1 p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
+            <div>
+              <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Active Payroll Alerts</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Live validations and exceptions</p>
             </div>
-            <span className="px-2 py-0.5 rounded-full bg-amber-500/15 border border-amber-500/30 text-amber-400 text-[10px] font-mono font-bold">
-              {alerts.length} Issues
-            </span>
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
           </div>
 
           <div className="space-y-3">
             {alerts.length === 0 ? (
-              <div className="p-4 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-xs flex items-center gap-2">
-                <CheckCircle2 className="w-4 h-4" />
-                <span>Zero blocking alerts. All records validated.</span>
+              <div className="py-8 text-center space-y-2">
+                <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto opacity-70" />
+                <p className="text-xs text-muted-foreground font-medium">All systems green. No pending payroll alerts.</p>
               </div>
             ) : (
-              alerts.map((al, idx) => (
+              alerts.map((alt, idx) => (
                 <div
                   key={idx}
-                  className="p-3.5 rounded-xl bg-slate-950 border border-slate-800 text-xs space-y-1.5"
+                  className={`p-3.5 rounded-lg border text-xs flex items-start gap-3 ${
+                    alt.type === 'BLOCKING_ERROR'
+                      ? 'bg-destructive/10 border-destructive/30 text-destructive'
+                      : 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
+                  }`}
                 >
-                  <div className="flex items-center justify-between">
-                    <span className="font-bold text-amber-300">{al.category} Alert</span>
-                    <span className="text-[10px] uppercase font-mono px-1.5 py-0.5 rounded bg-amber-500/20 text-amber-400">
-                      {al.severity}
+                  <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold block uppercase text-[10px] tracking-wider mb-0.5">
+                      {alt.type.replace('_', ' ')}
                     </span>
+                    <p className="leading-relaxed">{alt.message}</p>
                   </div>
-                  <p className="text-slate-300 text-[11px]">{al.message}</p>
-                  {al.items?.length > 0 && (
-                    <div className="pt-1 text-[10px] text-slate-500 font-mono">
-                      Impacted: {al.items.join(', ')}
-                    </div>
-                  )}
                 </div>
               ))
             )}
           </div>
         </div>
 
-        {/* Department Overview Table */}
-        <div className="lg:col-span-2 p-6 rounded-3xl bg-slate-900/80 border border-slate-800 shadow-xl space-y-4">
-          <div className="flex items-center justify-between pb-3 border-b border-slate-800">
+        {/* Department Table */}
+        <div className="lg:col-span-2 p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
+          <div className="flex items-center justify-between pb-3 border-b border-border">
             <div>
-              <h3 className="text-sm font-bold text-white tracking-tight">Department Workforce & Budget</h3>
-              <p className="text-xs text-slate-400 mt-0.5">Headcount and active contract budget per division</p>
+              <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Department Workforce & Cost Summary</h3>
+              <p className="text-xs text-muted-foreground mt-0.5">Monthly allocation breakdown</p>
             </div>
+            <Users className="w-4 h-4 text-primary" />
           </div>
 
           <div className="overflow-x-auto">
-            <table className="w-full text-left text-xs text-slate-300">
-              <thead className="bg-slate-950 text-slate-400 uppercase text-[10px] font-bold border-b border-slate-800">
-                <tr>
-                  <th className="px-4 py-2.5">Department</th>
-                  <th className="px-4 py-2.5">Manager</th>
-                  <th className="px-4 py-2.5">Headcount</th>
-                  <th className="px-4 py-2.5 text-right">Monthly Budget</th>
+            <table className="w-full text-left text-xs">
+              <thead>
+                <tr className="border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
+                  <th className="pb-3">Department</th>
+                  <th className="pb-3 text-center">Active Headcount</th>
+                  <th className="pb-3 text-right">Total Monthly Budget</th>
+                  <th className="pb-3 text-right">Avg Per Head</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-slate-800/60 bg-slate-900/40">
-                {departments.map((d) => (
-                  <tr key={d.id} className="hover:bg-slate-850/40 transition-colors">
-                    <td className="px-4 py-3 font-bold text-white">
-                      {d.name}
-                    </td>
-                    <td className="px-4 py-3 text-slate-400">
-                      {d.managerName || 'Unassigned'}
-                    </td>
-                    <td className="px-4 py-3 font-mono font-semibold text-slate-200">
-                      {d.headcount} members
-                    </td>
-                    <td className="px-4 py-3 font-mono font-bold text-emerald-400 text-right">
-                      {formatCurrency(d.monthlySalary)}
-                    </td>
-                  </tr>
-                ))}
+              <tbody className="divide-y divide-border">
+                {deptCosts.map((d) => {
+                  const avg = d.headcount > 0 ? d.salaryCost / d.headcount : 0;
+                  return (
+                    <tr key={d.departmentId} className="hover:bg-secondary/50 transition-colors">
+                      <td className="py-3 font-semibold text-foreground">{d.department}</td>
+                      <td className="py-3 text-center font-mono text-muted-foreground">{d.headcount}</td>
+                      <td className="py-3 text-right font-mono font-bold text-foreground">
+                        {formatCurrency(d.salaryCost)}
+                      </td>
+                      <td className="py-3 text-right font-mono text-muted-foreground">
+                        {formatCurrency(avg)}
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
