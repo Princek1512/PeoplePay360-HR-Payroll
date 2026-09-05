@@ -98,8 +98,8 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
         .filter((r) => r.status === 'approved')
         .reduce((acc, r) => acc + Number(r.durationAmount), 0);
       const pending = tot.requests.filter((r) => r.status === 'pending').length;
-      const totalAllocated = tot.allocations.reduce((acc, a) => acc + Number(a.allocatedDays), 0);
-      const totalUsed = tot.allocations.reduce((acc, a) => acc + Number(a.usedDays), 0);
+      const totalAllocated = tot.allocations.reduce((acc, a) => acc + Number(a.allocatedAmount), 0);
+      const totalUsed = tot.allocations.reduce((acc, a) => acc + Number(a.takenAmount), 0);
       const rem = Math.max(0, totalAllocated - totalUsed);
 
       return {

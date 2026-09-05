@@ -103,22 +103,25 @@ export const getAttendanceStatus = async (req: Request, res: Response, next: Nex
       });
     }
 
-    // Find the latest attendance record for this employee
-    const latest = await prisma.attendance.findFirst({
-      where: { employeeId },
+    // Find active unclosed session for this employee
+    const activeSession = await prisma.attendance.findFirst({
+      where: { employeeId, checkOut: null },
       orderBy: { checkIn: 'desc' }
     });
 
-    const isCheckedIn = latest ? latest.checkOut === null : false;
+    const isCheckedIn = !!activeSession;
 
-    // Today's total worked hours
+    // Today's total worked hours (current day boundary)
     const todayStart = new Date();
     todayStart.setHours(0, 0, 0, 0);
+
+    const todayEnd = new Date();
+    todayEnd.setHours(23, 59, 59, 999);
 
     const todayRecords = await prisma.attendance.findMany({
       where: {
         employeeId,
-        checkIn: { gte: todayStart }
+        checkIn: { gte: todayStart, lte: todayEnd }
       }
     });
 
@@ -136,7 +139,7 @@ export const getAttendanceStatus = async (req: Request, res: Response, next: Nex
       success: true,
       data: {
         isCheckedIn,
-        activeSession: isCheckedIn ? latest : null,
+        activeSession,
         todayHours: Math.round((todayHours + Number.EPSILON) * 100) / 100
       }
     });
@@ -152,6 +155,28 @@ export const toggleCheckIn = async (req: Request, res: Response, next: NextFunct
       return res.status(400).json({
         success: false,
         message: 'Unable to initialize employee profile for attendance.'
+      });
+    }
+
+    // Auto-close any stale unclosed sessions from previous days (older than today 00:00)
+    const todayStart = new Date();
+    todayStart.setHours(0, 0, 0, 0);
+
+    const staleRecords = await prisma.attendance.findMany({
+      where: {
+        employeeId,
+        checkOut: null,
+        checkIn: { lt: todayStart }
+      }
+    });
+
+    for (const stale of staleRecords) {
+      const autoOut = new Date(new Date(stale.checkIn).getTime() + 8 * 60 * 60 * 1000);
+      const diffMs = autoOut.getTime() - new Date(stale.checkIn).getTime();
+      const workedHours = Math.round(((diffMs / (1000 * 60 * 60)) + Number.EPSILON) * 100) / 100;
+      await prisma.attendance.update({
+        where: { id: stale.id },
+        data: { checkOut: autoOut, workedHours }
       });
     }
 

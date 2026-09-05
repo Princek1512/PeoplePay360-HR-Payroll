@@ -660,11 +660,27 @@ export const DashboardPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2 sm:ml-auto">
-              <span className="text-[10px] text-muted-foreground uppercase">Company</span>
-              <span className="px-3 py-1.5 rounded-md bg-secondary border border-border font-bold text-foreground">
-                OXP Pvt Ltd
-              </span>
+            <div className="flex items-center gap-3 sm:ml-auto font-sans">
+              <div className="px-3 py-1.5 rounded-md bg-secondary border border-border text-left font-mono">
+                <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
+                  Today
+                </span>
+                <span className="text-xs font-bold text-foreground">
+                  {todayHours.toFixed(1)} hrs
+                </span>
+              </div>
+
+              <button
+                type="button"
+                onClick={toggleCheckIn}
+                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold shadow-sm transition-all ${isCheckedIn
+                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                  }`}
+              >
+                <Clock className="w-3.5 h-3.5" />
+                <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
+              </button>
             </div>
           </div>
 
