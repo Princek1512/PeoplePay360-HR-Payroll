@@ -398,13 +398,14 @@ async function main() {
 
   // 10. Time Off Allocations
   for (const emp of [empAdmin, empPayrollManager, empHrManager, empEngineer, empSales]) {
+    const isEngineer = emp.id === empEngineer.id;
     await prisma.timeOffAllocation.create({
       data: {
         employeeId: emp.id,
         timeOffTypeId: typePaidLeave.id,
         allocatedAmount: 20.0,
-        takenAmount: 2.0,
-        remainingAmount: 18.0,
+        takenAmount: isEngineer ? 2.0 : 0.0,
+        remainingAmount: isEngineer ? 18.0 : 20.0,
         validFrom: yearStart,
         validTo: yearEnd,
         status: 'approved'
@@ -415,15 +416,16 @@ async function main() {
       data: {
         employeeId: emp.id,
         timeOffTypeId: typeSickLeave.id,
-        allocatedAmount: 10.0,
+        allocatedAmount: 20.0,
         takenAmount: 0.0,
-        remainingAmount: 10.0,
+        remainingAmount: 20.0,
         validFrom: yearStart,
         validTo: yearEnd,
         status: 'approved'
       }
     });
   }
+
 
   // 11. Sample Time Off Request (Past dates)
   await prisma.timeOffRequest.create({
