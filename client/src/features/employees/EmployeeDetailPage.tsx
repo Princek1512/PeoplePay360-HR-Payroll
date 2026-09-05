@@ -506,23 +506,28 @@ export const EmployeeDetailPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border">
-                    {payslipsList.map((slip) => (
-                      <tr key={slip.id} className="hover:bg-secondary/40 transition-colors">
-                        <td className="px-4 py-3 font-bold text-foreground">
-                          {slip.payrun?.name || 'Monthly Payroll'}
-                        </td>
-                        <td className="px-4 py-3 font-mono text-muted-foreground">
-                          {formatDate(slip.periodStart)} — {formatDate(slip.periodEnd)}
-                        </td>
-                        <td className="px-4 py-3 font-mono">
-                          {formatCurrency(slip.grossSalary)}
-                        </td>
-                        <td className="px-4 py-3 font-mono text-rose-600 dark:text-rose-400">
-                          -{formatCurrency(slip.totalDeductions)}
-                        </td>
-                        <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
-                          {formatCurrency(slip.netSalary)}
-                        </td>
+                    {payslipsList.map((slip) => {
+                      const gross = Number(slip.grossSalary) || 0;
+                      const net = Number(slip.netSalary) || 0;
+                      const deductions = Math.max(0, gross - net);
+
+                      return (
+                        <tr key={slip.id} className="hover:bg-secondary/40 transition-colors">
+                          <td className="px-4 py-3 font-bold text-foreground">
+                            {slip.payrun?.name || 'Monthly Payroll'}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-muted-foreground">
+                            {formatDate(slip.periodStart)} — {formatDate(slip.periodEnd)}
+                          </td>
+                          <td className="px-4 py-3 font-mono">
+                            {formatCurrency(gross)}
+                          </td>
+                          <td className="px-4 py-3 font-mono text-rose-600 dark:text-rose-400">
+                            -{formatCurrency(deductions)}
+                          </td>
+                          <td className="px-4 py-3 font-mono font-bold text-emerald-700 dark:text-emerald-400">
+                            {formatCurrency(net)}
+                          </td>
                         <td className="px-4 py-3 text-right">
                           <button
                             onClick={() => navigate(`/payslips/${slip.id}`)}
@@ -533,7 +538,8 @@ export const EmployeeDetailPage: React.FC = () => {
                           </button>
                         </td>
                       </tr>
-                    ))}
+                    );
+                  })}
                   </tbody>
                 </table>
               </div>
