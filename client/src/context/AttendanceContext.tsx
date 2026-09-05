@@ -27,7 +27,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
   const [lastPunchTimestamp, setLastPunchTimestamp] = useState<number>(Date.now());
 
   const refreshStatus = useCallback(async () => {
-    if (!isAuthenticated || !user?.employeeId) return;
+    if (!isAuthenticated) return;
     try {
       const res = await apiClient.get('/attendance/status');
       const data = res.data.data;
@@ -45,7 +45,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
     } catch (err) {
       // Ignore if user has no employee profile
     }
-  }, [isAuthenticated, user?.employeeId]);
+  }, [isAuthenticated]);
 
   // Initial load
   useEffect(() => {
