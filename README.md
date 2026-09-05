@@ -26,10 +26,11 @@ PeoplePay360 is an integrated, enterprise-grade HR + Payroll platform where the 
 
 ## 🏗️ Architecture & Tech Stack
 
-- **Backend Framework**: Node.js + Express + TypeScript
-- **ORM & Database**: Prisma ORM + PostgreSQL 16 (supports Docker and Cloud providers like Neon, Supabase, Railway)
+- **Frontend Client (`client/`)**: React 18, TypeScript, Vite, Tailwind CSS, Lucide React Icons, Axios, React Router v6
+- **Backend API (`server/`)**: Node.js, Express, TypeScript, tsx
+- **ORM & Database**: Prisma ORM + PostgreSQL 16 (Supports local Docker and Cloud PostgreSQL e.g., Supabase, Neon, Railway)
 - **Authentication**: Stateless JWT access & refresh tokens + bcrypt password hashing
-- **Security**: Centralized RBAC permissions matrix, strict input validation
+- **Security & Permissions**: Centralized 5-tier RBAC matrix and audited transactions
 
 ---
 
@@ -37,60 +38,56 @@ PeoplePay360 is an integrated, enterprise-grade HR + Payroll platform where the 
 
 ### 1. Prerequisites
 - Node.js 20+
-- Docker (optional, if running PostgreSQL locally) OR a Cloud PostgreSQL database URL (Neon, Supabase, Railway)
+- Cloud PostgreSQL (e.g., Supabase, Neon) OR Docker for local PostgreSQL
 
-### 2. Environment Setup
-Copy `.env.example` to `server/.env`:
+### 2. Configure Backend
+Copy `server/.env.example` to `server/.env`:
 ```bash
-cp .env.example server/.env
+cd server
+cp .env.example .env
 ```
 Set your PostgreSQL connection string in `server/.env`:
 ```env
-DATABASE_URL="postgresql://<user>:<password>@<host>:5432/peoplepay360?schema=public"
+DATABASE_URL="postgresql://<user>:<password>@<host>:5432/postgres?sslmode=require"
 ```
 
-### 3. Install Dependencies & Generate Prisma Client
+### 3. Initialize Database & Seed
+From `server/` directory:
 ```bash
-cd server
 npm install
 npx prisma generate
-```
-
-### 4. Push Database Schema & Seed Demo Data
-```bash
 npm run prisma:push
 npm run prisma:seed
 ```
 
-### 5. Start Development Server
+### 4. Start Backend Server
 ```bash
 npm run dev
 ```
-Server runs on `http://localhost:5000`.
-Health check: `http://localhost:5000/api/health`
+Backend runs at `http://localhost:5000` (Health check: `http://localhost:5000/api/health`).
 
----
-
-## 🐳 Docker Deployment
-
-To spin up PostgreSQL 16 Alpine, pgAdmin 4, and the PeoplePay360 backend in Docker containers:
+### 5. Start Frontend Client
+In another terminal:
 ```bash
-docker compose up -d
+cd client
+npm install
+npm run dev
 ```
-- API: `http://localhost:5000`
-- pgAdmin: `http://localhost:5050` (Login: `admin@peoplepay360.com` / `admin123`)
+Frontend runs at `http://localhost:5173`.
 
 ---
 
 ## 👥 Default Demo Accounts
 
-| Role | Email | Password |
-|---|---|---|
-| **Admin** | `admin@peoplepay360.com` | `Admin@123` |
-| **HR Payroll Manager** | `payroll.manager@peoplepay360.com` | `Password@123` |
-| **HR Manager** | `hr.manager@peoplepay360.com` | `Password@123` |
-| **HR Payroll User** | `payroll.user@peoplepay360.com` | `Password@123` |
-| **Employee** | `employee@peoplepay360.com` | `Password@123` |
+Use the **1-Click Quick Demo Switcher** on the login page or enter credentials manually:
+
+| Role | Email | Password | Scope |
+|---|---|---|---|
+| **Admin** | `admin@peoplepay360.com` | `Admin@123` | Full system control, users & roles |
+| **HR Payroll Manager** | `payroll.manager@peoplepay360.com` | `Password@123` | Full payroll runs, salary structures & rules |
+| **HR Manager** | `hr.manager@peoplepay360.com` | `Password@123` | Employees, contracts, attendance, time off approvals |
+| **HR Payroll User** | `payroll.user@peoplepay360.com` | `Password@123` | Payrun generation & payslips view |
+| **Employee** | `employee@peoplepay360.com` | `Password@123` | Personal profile, punch clock, time off & payslips |
 
 ---
 
