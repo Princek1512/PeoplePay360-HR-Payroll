@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payslip - {{payrunName}} - {{employeeName}}</title>
+  <style>
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+      margin: 0;
+      padding: 30px;
+      color: #1e293b;
+      background-color: #ffffff;
+    }
+    .header {
+      display: flex;
+      justify-content: space-between;
+      border-bottom: 2px solid #0f172a;
+      padding-bottom: 16px;
+      margin-bottom: 24px;
+    }
+    .logo-area h1 {
+      margin: 0;
+      font-size: 24px;
+      font-weight: 800;
+      color: #2563eb;
+      letter-spacing: -0.5px;
+    }
+    .logo-area p {
+      margin: 4px 0 0 0;
+      font-size: 13px;
+      color: #64748b;
+    }
+    .slip-meta {
+      text-align: right;
+    }
+    .slip-meta h2 {
+      margin: 0;
+      font-size: 18px;
+      color: #0f172a;
+    }
+    .slip-meta p {
+      margin: 4px 0 0 0;
+      font-size: 12px;
+      color: #64748b;
+    }
+    .info-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+      margin-bottom: 24px;
+      background: #f8fafc;
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px solid #e2e8f0;
+      font-size: 13px;
+    }
+    .info-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+    }
+    .info-label {
+      color: #64748b;
+      font-weight: 500;
+    }
+    .info-value {
+      font-weight: 600;
+      color: #0f172a;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin-bottom: 24px;
+      font-size: 13px;
+    }
+    th {
+      background: #0f172a;
+      color: #ffffff;
+      text-align: left;
+      padding: 10px 12px;
+      font-weight: 600;
+    }
+    th.num, td.num {
+      text-align: right;
+    }
+    td {
+      padding: 10px 12px;
+      border-bottom: 1px solid #e2e8f0;
+    }
+    tr:nth-child(even) td {
+      background-color: #f8fafc;
+    }
+    .tag {
+      display: inline-block;
+      padding: 2px 6px;
+      border-radius: 4px;
+      font-size: 10px;
+      font-weight: 700;
+      text-transform: uppercase;
+    }
+    .tag-basic { background: #dbeafe; color: #1e40af; }
+    .tag-allowance { background: #dcfce7; color: #166534; }
+    .tag-gross { background: #fef9c3; color: #854d0e; }
+    .tag-deduction { background: #fee2e2; color: #991b1b; }
+    .tag-net { background: #e0e7ff; color: #3730a3; }
+    .totals-box {
+      margin-left: auto;
+      width: 320px;
+      background: #f8fafc;
+      border: 1px solid #cbd5e1;
+      border-radius: 8px;
+      padding: 16px;
+      margin-bottom: 30px;
+    }
+    .total-row {
+      display: flex;
+      justify-content: space-between;
+      padding: 6px 0;
+      font-size: 14px;
+    }
+    .total-row.net {
+      border-top: 2px solid #0f172a;
+      margin-top: 6px;
+      padding-top: 10px;
+      font-size: 17px;
+      font-weight: 800;
+      color: #2563eb;
+    }
+    .footer {
+      border-top: 1px solid #e2e8f0;
+      padding-top: 16px;
+      font-size: 11px;
+      color: #94a3b8;
+      text-align: center;
+    }
+    @media print {
+      body { padding: 0; }
+      .no-print { display: none; }
+    }
+  </style>
+</head>
+<body>
+  <div class="header">
+    <div class="logo-area">
+      <h1>PeoplePay360</h1>
+      <p>Official Salary Statement & Earnings Breakdown</p>
+    </div>
+    <div class="slip-meta">
+      <h2>{{payrunName}}</h2>
+      <p>Period: {{periodStart}} to {{periodEnd}}</p>
+      <p>Payslip ID: {{payslipId}}</p>
+    </div>
+  </div>
+
+  <div class="info-grid">
+    <div>
+      <div class="info-row"><span class="info-label">Employee Name:</span> <span class="info-value">{{employeeName}}</span></div>
+      <div class="info-row"><span class="info-label">Email:</span> <span class="info-value">{{employeeEmail}}</span></div>
+      <div class="info-row"><span class="info-label">Department:</span> <span class="info-value">{{department}}</span></div>
+      <div class="info-row"><span class="info-label">Job Title:</span> <span class="info-value">{{jobTitle}}</span></div>
+    </div>
+    <div>
+      <div class="info-row"><span class="info-label">Bank Account:</span> <span class="info-value">{{bankAccount}}</span></div>
+      <div class="info-row"><span class="info-label">Bank & IFSC:</span> <span class="info-value">{{bankDetails}}</span></div>
+      <div class="info-row"><span class="info-label">Days Worked:</span> <span class="info-value">{{workedDays}} days</span></div>
+      <div class="info-row"><span class="info-label">Status:</span> <span class="info-value">{{status}}</span></div>
+    </div>
+  </div>
+
+  <table>
+    <thead>
+      <tr>
+        <th style="width: 80px;">Seq</th>
+        <th style="width: 100px;">Code</th>
+        <th>Salary Component</th>
+        <th style="width: 120px;">Category</th>
+        <th class="num" style="width: 140px;">Amount ($)</th>
+      </tr>
+    </thead>
+    <tbody>
+      {{tableRows}}
+    </tbody>
+  </table>
+
+  <div class="totals-box">
+    <div class="total-row">
+      <span>Gross Earnings:</span>
+      <strong>${{grossSalary}}</strong>
+    </div>
+    <div class="total-row">
+      <span>Total Deductions:</span>
+      <strong>${{totalDeductions}}</strong>
+    </div>
+    <div class="total-row net">
+      <span>Net Take-Home Pay:</span>
+      <span>${{netSalary}}</span>
+    </div>
+  </div>
+
+  <div class="footer">
+    This is a system-generated payslip generated by PeoplePay360 on {{generatedAt}}. No physical signature is required.
+  </div>
+</body>
+</html>
