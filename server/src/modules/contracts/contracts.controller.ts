@@ -138,7 +138,7 @@ export const createContract = async (req: Request, res: Response, next: NextFunc
       const yearStart = new Date(start.getFullYear(), 0, 1);
       const yearEnd = new Date(start.getFullYear(), 11, 31);
       const types = await prisma.timeOffType.findMany({ where: { requiresAllocation: true } });
-      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 10.0 };
+      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 20.0 };
       
       for (const type of types) {
         const existing = await prisma.timeOffAllocation.findFirst({
@@ -240,7 +240,7 @@ export const updateContract = async (req: Request, res: Response, next: NextFunc
       const yearStart = new Date(start.getFullYear(), 0, 1);
       const yearEnd = new Date(start.getFullYear(), 11, 31);
       const types = await prisma.timeOffType.findMany({ where: { requiresAllocation: true } });
-      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 10.0 };
+      const defaultAllocations: Record<string, number> = { 'Paid Time Off (PTO)': 20.0, 'Sick / Medical Leave': 20.0 };
       
       for (const type of types) {
         const existing = await prisma.timeOffAllocation.findFirst({
