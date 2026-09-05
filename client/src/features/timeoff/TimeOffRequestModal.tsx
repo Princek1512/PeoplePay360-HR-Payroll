@@ -36,11 +36,29 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
       const today = new Date().toISOString().split('T')[0];
       setStartDate(today);
       setEndDate(today);
-      setDurationAmount('1');
+      setDurationAmount('1'); 
       setReason('');
       setError(null);
     }
   }, [isOpen]);
+
+  // Calculate duration automatically if start and end dates are different
+  useEffect(() => {
+    if (startDate && endDate) {
+      const start = new Date(startDate);
+      const end = new Date(endDate);
+      if (end > start) {
+        const diffTime = end.getTime() - start.getTime();
+        const diffDays = Math.round(diffTime / (1000 * 60 * 60 * 24)) + 1;
+        setDurationAmount(diffDays.toString());
+      } else if (end.getTime() === start.getTime()) {
+        // If they change back to same day and it was previously auto-calculated to > 1
+        if (Number(durationAmount) > 1) {
+           setDurationAmount('1');
+        }
+      }
+    }
+  }, [startDate, endDate]);
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -131,7 +149,7 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
 
         <div>
           <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
-            Duration (Days / Hours)
+            Duration (Days)
           </label>
           <input
             type="number"
@@ -139,8 +157,10 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
             min="0.5"
             value={durationAmount}
             onChange={(e) => setDurationAmount(e.target.value)}
-            className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
+            className={`w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono ${startDate !== endDate ? 'opacity-70 cursor-not-allowed bg-muted/30' : ''}`}
             required
+            readOnly={startDate !== endDate}
+            title={startDate !== endDate ? "Duration is automatically calculated for multiple days" : "Enter days for same-day leave (e.g. 0.5 for half day)"}
           />
         </div>
 
