@@ -166,6 +166,41 @@ export const DashboardPage: React.FC = () => {
               : 'Personal employee profile, live attendance clock, compensation baseline, and leave records.'}
           </p>
         </div>
+
+        {/* Live Attendance Punch Action - AVAILABLE FOR ALL ROLES */}
+        <div className="flex items-center gap-3">
+          <div className="px-3.5 py-1.5 rounded-lg bg-card border border-border text-left shadow-sm">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
+              Today's Attendance
+            </span>
+            <div className="flex items-center gap-2">
+              <span className={`w-2 h-2 rounded-full ${isCheckedIn ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
+              <span className="text-xs font-bold text-foreground font-mono">
+                {isCheckedIn ? `${todayHours.toFixed(1)} hrs (Clocked In)` : 'Clocked Out'}
+              </span>
+            </div>
+          </div>
+
+          <button
+            type="button"
+            onClick={async () => {
+              await toggleCheckIn();
+              if (isManagerOrAdmin) {
+                fetchManagerData();
+              } else {
+                fetchPersonalEmployeeData();
+              }
+            }}
+            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold shadow-sm transition-all ${
+              isCheckedIn
+                ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            <Clock className="w-3.5 h-3.5" />
+            <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
+          </button>
+        </div>
       </div>
 
       {/* ========================================================================= */}
@@ -805,53 +840,66 @@ export const DashboardPage: React.FC = () => {
 
               <div className="h-44 relative flex flex-col justify-between pt-4">
                 {(() => {
-                  const maxTrendVal = Math.max(...netTrend.map((t) => Number(t.netSalary || 0)), 1);
-                  const trendPoints = netTrend.map((item, idx) => {
-                    const x = netTrend.length > 1 ? (idx / (netTrend.length - 1)) * 260 + 20 : 150;
-                    const y = 70 - Math.min(55, Math.round((Number(item.netSalary || 0) / maxTrendVal) * 55));
-                    return { x, y, month: item.month, val: item.netSalary };
+                  const displayTrend = netTrend.length > 0 ? netTrend : [
+                    { month: 'Apr', netSalary: 1100000 },
+                    { month: 'May', netSalary: 1500000 },
+                    { month: 'Jun', netSalary: 900000 },
+                    { month: 'Jul', netSalary: 1200000 },
+                    { month: 'Aug', netSalary: 700000 },
+                    { month: 'Sep', netSalary: 1800000 }
+                  ];
+
+                  const maxTrendVal = Math.max(...displayTrend.map((t) => Number(t.netSalary || 0)), 1);
+                  const trendPoints = displayTrend.map((item, idx) => {
+                    const x = displayTrend.length === 1 ? 150 : Math.round((idx / (displayTrend.length - 1)) * 240 + 30);
+                    const y = 62 - Math.round((Number(item.netSalary || 0) / maxTrendVal) * 45);
+                    return { x, y, month: item.month, val: Number(item.netSalary || 0) };
                   });
-                  const svgPathD = trendPoints.length > 0
+
+                  const svgPathD = trendPoints.length > 1
                     ? `M ${trendPoints.map((p) => `${p.x} ${p.y}`).join(' L ')}`
-                    : 'M 10 50 L 60 40 L 110 60 L 160 55 L 210 70 L 260 45';
-                  const peakPoint = trendPoints.reduce((prev, curr) => (curr.val > prev.val ? curr : prev), trendPoints[0] || { x: 260, y: 45, val: 1800000 });
+                    : `M 30 ${trendPoints[0].y} L 270 ${trendPoints[0].y}`;
+
+                  const peakPoint = trendPoints.reduce((prev, curr) => (curr.val >= prev.val ? curr : prev), trendPoints[0]);
 
                   return (
                     <>
                       <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 80">
+                        {/* Subtle background grid lines */}
+                        <line x1="20" y1="20" x2="280" y2="20" stroke="currentColor" strokeDasharray="3 3" className="text-border/40" />
+                        <line x1="20" y1="45" x2="280" y2="45" stroke="currentColor" strokeDasharray="3 3" className="text-border/40" />
+                        <line x1="20" y1="70" x2="280" y2="70" stroke="currentColor" strokeDasharray="3 3" className="text-border/40" />
+
+                        {/* Trend Line Path */}
                         <path
                           d={svgPathD}
                           fill="none"
                           stroke="currentColor"
-                          strokeWidth="2.5"
+                          strokeWidth="3"
                           className="text-sky-500"
                         />
+
+                        {/* Peak Value Badge Offset Above Point */}
                         {peakPoint && (
-                          <g transform={`translate(${Math.max(10, peakPoint.x - 20)}, ${Math.max(5, peakPoint.y - 24)})`}>
-                            <rect x="0" y="0" width="42" height="16" rx="4" className="fill-sky-500/20 stroke-sky-500" strokeWidth="1" />
-                            <text x="21" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">
-                              {peakPoint.val >= 100000 ? `${(peakPoint.val / 100000).toFixed(1)}L` : `$${Math.round(peakPoint.val / 1000)}k`}
+                          <g transform={`translate(${Math.max(10, Math.min(245, peakPoint.x - 22))}, ${Math.max(0, peakPoint.y - 20)})`}>
+                            <rect x="0" y="0" width="44" height="16" rx="4" className="fill-card stroke-sky-500" strokeWidth="1" />
+                            <text x="22" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">
+                              {peakPoint.val >= 100000 ? `$${(peakPoint.val / 100000).toFixed(1)}L` : `$${Math.round(peakPoint.val / 1000)}k`}
                             </text>
                           </g>
                         )}
+
+                        {/* Point Circles */}
                         {trendPoints.map((p, i) => (
-                          <circle key={i} cx={p.x} cy={p.y} r="3.5" className="fill-sky-500" />
+                          <circle key={i} cx={p.x} cy={p.y} r="4" className="fill-sky-500 stroke-card" strokeWidth="2" />
                         ))}
-                        {trendPoints.length === 0 && (
-                          <>
-                            <circle cx="10" cy="50" r="3.5" className="fill-sky-500" />
-                            <circle cx="60" cy="40" r="3.5" className="fill-sky-500" />
-                            <circle cx="110" cy="60" r="3.5" className="fill-sky-500" />
-                            <circle cx="160" cy="55" r="3.5" className="fill-sky-500" />
-                            <circle cx="210" cy="70" r="3.5" className="fill-sky-500" />
-                            <circle cx="260" cy="45" r="3.5" className="fill-sky-500" />
-                          </>
-                        )}
                       </svg>
-                      <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-1">
-                        {netTrend.length > 0
-                          ? netTrend.map((t) => <span key={t.month}>{t.month}</span>)
-                          : ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((m) => <span key={m}>{m}</span>)}
+
+                      {/* Month Labels */}
+                      <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-3 pt-1 border-t border-border/40">
+                        {trendPoints.map((t) => (
+                          <span key={t.month} className="font-semibold">{t.month}</span>
+                        ))}
                       </div>
                     </>
                   );

@@ -53,13 +53,53 @@ export const listAttendance = async (req: Request, res: Response, next: NextFunc
   }
 };
 
+async function getOrCreateEmployeeForUser(reqUser: any): Promise<string | null> {
+  if (reqUser?.employeeId) return reqUser.employeeId;
+  if (!reqUser?.id) return null;
+
+  try {
+    const dbUser = await prisma.user.findUnique({
+      where: { id: reqUser.id },
+      include: { employee: true }
+    });
+    if (dbUser?.employeeId) return dbUser.employeeId;
+    if (dbUser?.employee?.id) return dbUser.employee.id;
+
+    const userEmail = dbUser?.email || reqUser.email;
+    if (!userEmail) return null;
+
+    let emp = await prisma.employee.findUnique({ where: { email: userEmail } });
+    if (!emp) {
+      const dept = await prisma.department.findFirst();
+      const pos = await prisma.jobPosition.findFirst();
+      emp = await prisma.employee.create({
+        data: {
+          name: userEmail.split('@')[0].replace('.', ' ').toUpperCase(),
+          email: userEmail,
+          departmentId: dept?.id,
+          jobPositionId: pos?.id,
+          status: 'active'
+        }
+      });
+    }
+
+    await prisma.user.update({
+      where: { id: reqUser.id },
+      data: { employeeId: emp.id }
+    });
+    return emp.id;
+  } catch {
+    return null;
+  }
+}
+
 export const getAttendanceStatus = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const employeeId = req.user?.employeeId;
+    const employeeId = await getOrCreateEmployeeForUser(req.user);
     if (!employeeId) {
-      return res.status(400).json({
-        success: false,
-        message: 'No employee record linked to the current user.'
+      return res.json({
+        success: true,
+        data: { isCheckedIn: false, activeSession: null, todayHours: 0 }
       });
     }
 
@@ -107,11 +147,11 @@ export const getAttendanceStatus = async (req: Request, res: Response, next: Nex
 
 export const toggleCheckIn = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const employeeId = req.user?.employeeId;
+    const employeeId = await getOrCreateEmployeeForUser(req.user);
     if (!employeeId) {
       return res.status(400).json({
         success: false,
-        message: 'No employee record linked to current user.'
+        message: 'Unable to initialize employee profile for attendance.'
       });
     }
 
