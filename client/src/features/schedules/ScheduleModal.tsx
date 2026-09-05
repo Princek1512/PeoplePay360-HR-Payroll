@@ -279,7 +279,7 @@ export const ScheduleModal: React.FC<ScheduleModalProps> = ({
                 type="number"
                 min="0.1"
                 max="168"
-                step="0.5"
+                step="any"
                 value={targetWeeklyHours}
                 onChange={(e) => handleTargetHoursChange(e.target.value)}
                 onBlur={() => {

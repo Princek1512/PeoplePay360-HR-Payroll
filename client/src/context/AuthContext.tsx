@@ -27,6 +27,7 @@ interface AuthContextType {
   isLoading: boolean;
   login: (email: string, pass: string) => Promise<void>;
   logout: () => void;
+  refreshUser: () => Promise<void>;
   can: (module: string, action?: PermissionAction) => boolean;
   hasRole: (...roles: string[]) => boolean;
 }
@@ -53,6 +54,18 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     }
     setIsLoading(false);
   }, []);
+
+  const refreshUser = async () => {
+    try {
+      const res = await apiClient.get('/auth/me');
+      if (res.data?.data) {
+        setUser(res.data.data);
+        localStorage.setItem('peoplepay360_user', JSON.stringify(res.data.data));
+      }
+    } catch (err) {
+      console.error('Failed to refresh user profile:', err);
+    }
+  };
 
   const login = async (email: string, pass: string) => {
     const encryptedPassword = encryptPassword(pass);
@@ -93,6 +106,7 @@ export const AuthProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         isLoading,
         login,
         logout,
+        refreshUser,
         can,
         hasRole
       }}

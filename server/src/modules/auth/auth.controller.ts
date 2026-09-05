@@ -167,3 +167,51 @@ export const refreshToken = async (req: Request, res: Response, next: NextFuncti
     return res.status(401).json({ success: false, message: 'Invalid or expired refresh token.' });
   }
 };
+
+export const changePassword = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    if (!req.user) {
+      return res.status(401).json({ success: false, message: 'Authentication required.' });
+    }
+
+    const { currentPassword, newPassword } = req.body;
+
+    if (!currentPassword || !newPassword) {
+      return res.status(400).json({ success: false, message: 'Current password and new password are required.' });
+    }
+
+    if (newPassword.length < 6) {
+      return res.status(400).json({ success: false, message: 'New password must be at least 6 characters long.' });
+    }
+
+    const user = await prisma.user.findUnique({
+      where: { id: req.user.id }
+    });
+
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User not found.' });
+    }
+
+    const rawCurrentPassword = decryptPassword(currentPassword);
+    const isValid = await bcrypt.compare(rawCurrentPassword, user.passwordHash);
+
+    if (!isValid) {
+      return res.status(400).json({ success: false, message: 'Incorrect current password.' });
+    }
+
+    const rawNewPassword = decryptPassword(newPassword);
+    const newPasswordHash = await bcrypt.hash(rawNewPassword, 10);
+
+    await prisma.user.update({
+      where: { id: user.id },
+      data: { passwordHash: newPasswordHash }
+    });
+
+    return res.json({
+      success: true,
+      message: 'Password changed successfully.'
+    });
+  } catch (err) {
+    next(err);
+  }
+};

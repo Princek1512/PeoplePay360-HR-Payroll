@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Modal } from '../../components/shared/Modal';
 import { apiClient } from '../../lib/apiClient';
 import { UserRoleType } from '../../lib/rbac';
+import { encryptPassword } from '../../lib/crypto';
 
 interface UserModalProps {
   isOpen: boolean;
@@ -73,7 +74,7 @@ export const UserModal: React.FC<UserModalProps> = ({
       } else {
         await apiClient.post('/users', {
           email,
-          password,
+          password: encryptPassword(password.trim()),
           employeeId: employeeId || null,
           roles: selectedRoles,
           isActive
@@ -87,6 +88,7 @@ export const UserModal: React.FC<UserModalProps> = ({
       setLoading(false);
     }
   };
+
 
   const availableRoles = [
     UserRoleType.EMPLOYEE,

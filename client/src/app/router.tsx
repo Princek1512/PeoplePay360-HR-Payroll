@@ -46,6 +46,16 @@ const ProtectedRoute: React.FC<{ module?: string; action?: 'read' | 'create' | '
   return <Outlet />;
 };
 
+// Profile redirect helper
+const ProfileRedirect: React.FC = () => {
+  const { user } = useAuth();
+  const empId = user?.employeeId || user?.employee?.id;
+  if (empId) {
+    return <Navigate to={`/employees/${empId}`} replace />;
+  }
+  return <Navigate to="/dashboard" replace />;
+};
+
 // Root index redirect
 const RootRedirect: React.FC = () => {
   const { isAuthenticated } = useAuth();
@@ -72,6 +82,10 @@ export const router = createBrowserRouter([
           {
             path: 'dashboard',
             element: <DashboardPage />
+          },
+          {
+            path: 'profile',
+            element: <ProfileRedirect />
           },
           {
             path: 'employees',

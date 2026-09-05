@@ -48,10 +48,10 @@ export function AppLayout() {
   )
 
   return (
-    <div className="min-h-screen bg-background font-sans text-foreground flex">
-      {/* Sidebar */}
-      <aside className="w-64 border-r border-border bg-card hidden md:flex flex-col shrink-0">
-        <div className="h-16 flex items-center px-6 border-b border-border">
+    <div className="h-screen w-screen overflow-hidden bg-background font-sans text-foreground flex">
+      {/* Fixed Sidebar */}
+      <aside className="w-64 h-screen border-r border-border bg-card hidden md:flex flex-col shrink-0 select-none">
+        <div className="h-16 flex items-center px-6 border-b border-border shrink-0">
           <Link to="/dashboard" className="flex items-center gap-2">
             <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
               PeoplePay<span className="text-primary opacity-80">360</span>
@@ -81,15 +81,16 @@ export function AppLayout() {
         </nav>
 
         {/* Sidebar Footer status */}
-        <div className="p-4 border-t border-border bg-card text-xs text-muted-foreground flex items-center gap-2">
+        <div className="p-4 border-t border-border bg-card text-xs text-muted-foreground flex items-center gap-2 shrink-0">
           <span className="w-2 h-2 rounded-full bg-emerald-500 live-dot" />
           <span className="font-medium">System Online</span>
         </div>
       </aside>
 
-      {/* Main Content */}
-      <div className="flex-1 flex flex-col min-w-0">
-        <header className="h-16 border-b border-border bg-background/95 backdrop-blur flex items-center justify-between px-6 sticky top-0 z-10">
+      {/* Main Content Viewport */}
+      <div className="flex-1 flex flex-col h-screen min-w-0 overflow-hidden">
+        {/* Fixed Top Navbar */}
+        <header className="h-16 shrink-0 border-b border-border bg-background/95 backdrop-blur-md flex items-center justify-between px-6 z-20">
           <div className="flex items-center gap-4 md:hidden">
             <h1 className="font-serif text-lg font-bold text-foreground">PeoplePay360</h1>
           </div>
@@ -118,30 +119,36 @@ export function AppLayout() {
             {/* Theme Mode Toggle */}
             <ModeToggle />
 
-            {/* User Avatar & Logout */}
+            {/* User Avatar & Profile Link */}
             <div className="flex items-center gap-2 pl-2 border-l border-border">
-              {user?.employee?.avatarUrl ? (
-                <img
-                  src={user.employee.avatarUrl}
-                  alt={user.employee.name}
-                  className="h-8 w-8 rounded-full border border-border object-cover"
-                />
-              ) : (
-                <div className="h-8 w-8 rounded-full bg-secondary border border-border flex items-center justify-center">
-                  <span className="text-xs font-medium uppercase text-foreground">
-                    {user?.roles?.[0]?.substring(0, 2) || "U"}
-                  </span>
-                </div>
-              )}
+              <Link
+                to="/profile"
+                className="flex items-center gap-2 p-1 rounded-lg hover:bg-secondary transition-all cursor-pointer group"
+                title="View My Profile & Security"
+              >
+                {user?.employee?.avatarUrl ? (
+                  <img
+                    src={user.employee.avatarUrl}
+                    alt={user.employee.name}
+                    className="h-8 w-8 rounded-full border border-border object-cover group-hover:border-primary transition-colors"
+                  />
+                ) : (
+                  <div className="h-8 w-8 rounded-full bg-secondary border border-border flex items-center justify-center group-hover:border-primary transition-colors">
+                    <span className="text-xs font-medium uppercase text-foreground">
+                      {user?.roles?.[0]?.substring(0, 2) || "U"}
+                    </span>
+                  </div>
+                )}
 
-              <div className="hidden lg:block text-left mr-1">
-                <div className="text-xs font-medium text-foreground leading-tight truncate max-w-[130px]">
-                  {user?.employee?.name || user?.email}
+                <div className="hidden lg:block text-left mr-1">
+                  <div className="text-xs font-medium text-foreground leading-tight truncate max-w-[130px] group-hover:text-primary transition-colors">
+                    {user?.employee?.name || user?.email}
+                  </div>
+                  <div className="text-[10px] text-muted-foreground capitalize">
+                    {user?.roles?.[0] || "User"}
+                  </div>
                 </div>
-                <div className="text-[10px] text-muted-foreground capitalize">
-                  {user?.roles?.[0] || "User"}
-                </div>
-              </div>
+              </Link>
 
               <button
                 onClick={() => logout()}
@@ -155,8 +162,11 @@ export function AppLayout() {
           </div>
         </header>
 
-        <main className="flex-1 overflow-auto p-6 max-w-7xl w-full mx-auto">
-          <Outlet />
+        {/* Scrollable Content Body */}
+        <main className="flex-1 overflow-y-auto p-6">
+          <div className="max-w-7xl w-full mx-auto">
+            <Outlet />
+          </div>
         </main>
       </div>
 

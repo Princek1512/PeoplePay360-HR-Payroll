@@ -341,9 +341,9 @@ async function main() {
     { email: 'admin@peoplepay360.com', pass: adminPasswordHash, empId: empAdmin.id, roles: ['Admin'] },
     { email: 'payroll.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empPayrollManager.id, roles: ['HR Payroll Manager'] },
     { email: 'hr.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empHrManager.id, roles: ['HR Manager'] },
-    { email: 'employee@peoplepay360.com', pass: defaultPasswordHash, empId: empEngineer.id, roles: ['Employee'] },
-    { email: 'payroll.user@peoplepay360.com', pass: defaultPasswordHash, empId: null, roles: ['HR Payroll User'] }
+    { email: 'employee@peoplepay360.com', pass: defaultPasswordHash, empId: empEngineer.id, roles: ['Employee'] }
   ];
+
 
   for (const u of usersToSeed) {
     const user = await prisma.user.create({

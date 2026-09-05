@@ -1,6 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import bcrypt from 'bcryptjs';
 import { prisma } from '../../config/db.js';
+import { decryptPassword } from '../../utils/crypto.js';
 
 export const listUsers = async (req: Request, res: Response, next: NextFunction) => {
   try {
@@ -84,7 +85,9 @@ export const createUser = async (req: Request, res: Response, next: NextFunction
       }
     }
 
-    const passwordHash = await bcrypt.hash(password, 10);
+    const rawPassword = decryptPassword(password).trim();
+    const passwordHash = await bcrypt.hash(rawPassword, 10);
+
 
     // Resolve roles
     const roleNames: string[] = Array.isArray(roles) && roles.length > 0 ? roles : ['Employee'];
