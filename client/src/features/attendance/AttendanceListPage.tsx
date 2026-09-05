@@ -8,7 +8,7 @@ import { Clock, Filter, Edit2, Play, Square } from 'lucide-react';
 
 export const AttendanceListPage: React.FC = () => {
   const { can } = useAuth();
-  const { isCheckedIn, toggleCheckIn } = useAttendance();
+  const { isCheckedIn, toggleCheckIn, lastPunchTimestamp } = useAttendance();
 
   const [records, setRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
@@ -32,7 +32,7 @@ export const AttendanceListPage: React.FC = () => {
 
   useEffect(() => {
     fetchRecords();
-  }, [statusFilter]);
+  }, [statusFilter, lastPunchTimestamp]);
 
   const handleCorrect = (record: any) => {
     setSelectedRecord(record);

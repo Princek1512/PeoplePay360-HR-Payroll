@@ -45,7 +45,11 @@ export const TimeOffRequestModal: React.FC<TimeOffRequestModalProps> = ({
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
-    setError(null);
+    if (new Date(startDate) > new Date(endDate)) {
+      setError('Start date cannot be after end date.');
+      setLoading(false);
+      return;
+    }
 
     try {
       await apiClient.post('/timeoff/requests', {

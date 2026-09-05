@@ -1,7 +1,11 @@
 import React, { useState, useEffect } from 'react';
+import { Link } from 'react-router-dom';
 import { apiClient } from '../../lib/apiClient';
 import { KpiCard } from '../../components/shared/KpiCard';
+import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatCurrency } from '../../lib/formatters';
+import { useAuth } from '../../context/AuthContext';
+import { useAttendance } from '../../context/AttendanceContext';
 import {
   LayoutDashboard,
   DollarSign,
@@ -14,27 +18,38 @@ import {
   TrendingUp,
   Filter,
   CheckCircle2,
-  Calendar
+  Search,
+  ExternalLink,
+  Clock,
+  Briefcase,
+  Mail,
+  Phone
 } from 'lucide-react';
 
 export const DashboardPage: React.FC = () => {
+  const { user } = useAuth();
+  const { isCheckedIn, todayHours, toggleCheckIn } = useAttendance();
+
   const [summary, setSummary] = useState<any>(null);
   const [deptCosts, setDeptCosts] = useState<any[]>([]);
   const [netTrend, setNetTrend] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [employees, setEmployees] = useState<any[]>([]);
   const [selectedDept, setSelectedDept] = useState('');
+  const [employeeSearch, setEmployeeSearch] = useState('');
   const [loading, setLoading] = useState(true);
 
   const fetchDashboardData = async () => {
     try {
       setLoading(true);
-      const [sumRes, costRes, trendRes, alertRes, deptRes] = await Promise.all([
+      const [sumRes, costRes, trendRes, alertRes, deptRes, empRes] = await Promise.all([
         apiClient.get('/dashboard/summary', { params: { departmentId: selectedDept || undefined } }),
         apiClient.get('/dashboard/salary-cost-by-department'),
         apiClient.get('/dashboard/net-salary-trend'),
         apiClient.get('/dashboard/alerts'),
-        apiClient.get('/dashboard/departments')
+        apiClient.get('/dashboard/departments'),
+        apiClient.get('/employees', { params: { departmentId: selectedDept || undefined } })
       ]);
 
       setSummary(sumRes.data.data);
@@ -42,6 +57,7 @@ export const DashboardPage: React.FC = () => {
       setNetTrend(trendRes.data.data || []);
       setAlerts(alertRes.data.data || []);
       setDepartments(deptRes.data.data || []);
+      setEmployees(empRes.data.data || []);
     } catch (err) {
       console.error(err);
     } finally {
@@ -56,6 +72,17 @@ export const DashboardPage: React.FC = () => {
   const maxDeptCost = Math.max(...deptCosts.map((d) => d.salaryCost), 1);
   const maxTrend = Math.max(...netTrend.map((t) => Math.max(t.grossSalary, t.netSalary)), 1);
 
+  const filteredEmployees = employees.filter((emp) => {
+    const q = employeeSearch.toLowerCase().trim();
+    if (!q) return true;
+    return (
+      emp.name?.toLowerCase().includes(q) ||
+      emp.email?.toLowerCase().includes(q) ||
+      emp.department?.name?.toLowerCase().includes(q) ||
+      emp.jobPosition?.title?.toLowerCase().includes(q)
+    );
+  });
+
   return (
     <div className="space-y-8 font-sans">
       {/* Header & Filter Bar */}
@@ -63,7 +90,7 @@ export const DashboardPage: React.FC = () => {
         <div>
           <div className="flex items-center gap-2">
             <LayoutDashboard className="w-5 h-5 text-primary" />
-            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Executive Payroll Dashboard</h1>
+            <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Main Dashboard</h1>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
             Real-time live aggregation across Employees, Contracts, Schedules, Attendance, and Payruns.
@@ -72,7 +99,7 @@ export const DashboardPage: React.FC = () => {
 
         {/* Filter Bar */}
         <div className="flex items-center gap-3">
-          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-card border border-border text-xs">
+          <div className="flex items-center gap-2 px-3 py-1.5 rounded-md bg-card border border-border text-xs shadow-sm">
             <Filter className="w-3.5 h-3.5 text-muted-foreground" />
             <select
               value={selectedDept}
@@ -87,6 +114,61 @@ export const DashboardPage: React.FC = () => {
               ))}
             </select>
           </div>
+        </div>
+      </div>
+
+      {/* Employee Greeting & Quick Stats Banner */}
+      <div className="p-6 rounded-xl bg-card border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="flex items-center gap-4">
+          {user?.employee?.avatarUrl ? (
+            <img
+              src={user.employee.avatarUrl}
+              alt="Avatar"
+              className="w-14 h-14 rounded-full border-2 border-primary/20 object-cover shrink-0"
+            />
+          ) : (
+            <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center text-primary font-serif font-bold text-xl shrink-0">
+              {user?.employee?.name?.[0] || user?.email?.[0] || 'U'}
+            </div>
+          )}
+          <div>
+            <div className="flex items-center gap-2">
+              <h2 className="font-serif text-xl font-bold text-foreground">
+                Welcome back, {user?.employee?.name || user?.email}!
+              </h2>
+              <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider font-mono">
+                {user?.roles?.[0] || 'Employee'}
+              </span>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              PeoplePay360 Platform • {user?.employee?.department || 'Enterprise Workforce'}
+            </p>
+          </div>
+        </div>
+
+        {/* Quick Employee Punch Clock & Status */}
+        <div className="flex items-center gap-3 self-start md:self-auto">
+          <div className="px-4 py-2 rounded-lg bg-secondary border border-border text-left">
+            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
+              Today's Worked
+            </span>
+            <span className="text-sm font-bold text-foreground font-mono">
+              {todayHours.toFixed(1)} hrs
+            </span>
+          </div>
+
+          <button
+            type="button"
+            onClick={toggleCheckIn}
+            className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-semibold shadow-sm transition-all ${
+              isCheckedIn
+                ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+            }`}
+          >
+            <Clock className="w-4 h-4" />
+            <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
+          </button>
         </div>
       </div>
 
@@ -127,6 +209,156 @@ export const DashboardPage: React.FC = () => {
           icon={<Activity className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
           variant="default"
         />
+      </div>
+
+      {/* SECTION: All Employee Details & Workforce Directory */}
+      <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
+          <div>
+            <div className="flex items-center gap-2">
+              <Users className="w-4 h-4 text-primary" />
+              <h3 className="font-serif text-base font-bold text-foreground tracking-tight">
+                All Employee Details & Workforce Directory
+              </h3>
+            </div>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Live corporate employee roster showing active positions, schedules, and payroll baseline
+            </p>
+          </div>
+
+          {/* Search Bar */}
+          <div className="relative w-full sm:w-72">
+            <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
+            <input
+              type="text"
+              value={employeeSearch}
+              onChange={(e) => setEmployeeSearch(e.target.value)}
+              placeholder="Search by name, email, or role..."
+              className="w-full bg-background border border-input rounded-md py-1.5 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+            />
+          </div>
+        </div>
+
+        <div className="overflow-x-auto">
+          <table className="w-full text-left text-xs text-foreground">
+            <thead className="bg-secondary text-muted-foreground uppercase text-[10px] font-bold border-b border-border">
+              <tr>
+                <th className="px-4 py-3">Employee</th>
+                <th className="px-4 py-3">Department & Position</th>
+                <th className="px-4 py-3">Contact Information</th>
+                <th className="px-4 py-3">Working Schedule</th>
+                <th className="px-4 py-3">Contract / Wage</th>
+                <th className="px-4 py-3 text-center">Status</th>
+                <th className="px-4 py-3 text-right">Actions</th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border bg-card">
+              {filteredEmployees.length === 0 ? (
+                <tr>
+                  <td colSpan={7} className="text-center py-8 text-xs text-muted-foreground italic">
+                    No employee records match your filter criteria.
+                  </td>
+                </tr>
+              ) : (
+                filteredEmployees.map((emp) => (
+                  <tr key={emp.id} className="hover:bg-secondary/40 transition-colors">
+                    <td className="px-4 py-3">
+                      <div className="flex items-center gap-3">
+                        {emp.avatarUrl ? (
+                          <img
+                            src={emp.avatarUrl}
+                            alt={emp.name}
+                            className="w-8 h-8 rounded-full border border-border object-cover shrink-0"
+                          />
+                        ) : (
+                          <div className="w-8 h-8 rounded-full bg-secondary border border-border flex items-center justify-center font-bold text-xs text-foreground shrink-0">
+                            {emp.name?.[0] || 'E'}
+                          </div>
+                        )}
+                        <div>
+                          <span className="font-semibold text-foreground block">
+                            {emp.name}
+                          </span>
+                          <span className="text-[10px] text-muted-foreground font-mono">
+                            ID: {emp.id.slice(0, 8)}
+                          </span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <div className="space-y-0.5">
+                        <span className="inline-block px-2 py-0.5 rounded bg-secondary border border-border text-[10px] font-medium text-foreground">
+                          {emp.department?.name || 'Unassigned'}
+                        </span>
+                        <div className="text-[11px] text-muted-foreground flex items-center gap-1">
+                          <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <span>{emp.jobPosition?.title || 'General Staff'}</span>
+                        </div>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <div className="space-y-0.5 font-mono text-[11px]">
+                        <div className="flex items-center gap-1.5 text-foreground">
+                          <Mail className="w-3 h-3 text-muted-foreground shrink-0" />
+                          <span className="truncate max-w-[170px]">{emp.email}</span>
+                        </div>
+                        {emp.phone && (
+                          <div className="flex items-center gap-1.5 text-muted-foreground">
+                            <Phone className="w-3 h-3 text-muted-foreground shrink-0" />
+                            <span>{emp.phone}</span>
+                          </div>
+                        )}
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      <div className="space-y-0.5">
+                        <span className="font-medium text-foreground block">
+                          {emp.workingSchedule?.name || 'Standard 40h'}
+                        </span>
+                        <span className="text-[10px] font-mono text-muted-foreground">
+                          {emp.workingSchedule?.totalWeeklyHours || 40} hrs/week
+                        </span>
+                      </div>
+                    </td>
+
+                    <td className="px-4 py-3">
+                      {emp.currentWage ? (
+                        <div className="space-y-0.5 font-mono">
+                          <span className="font-bold text-foreground block">
+                            {formatCurrency(emp.currentWage)}
+                          </span>
+                          <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider">
+                            Active Contract
+                          </span>
+                        </div>
+                      ) : (
+                        <span className="text-muted-foreground italic text-[11px]">No active contract</span>
+                      )}
+                    </td>
+
+                    <td className="px-4 py-3 text-center">
+                      <StatusBadge status={emp.status} size="sm" />
+                    </td>
+
+                    <td className="px-4 py-3 text-right">
+                      <Link
+                        to={`/employees/${emp.id}`}
+                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-primary hover:bg-secondary transition-colors"
+                        title="View Employee Profile"
+                      >
+                        <span>Details</span>
+                        <ExternalLink className="w-3 h-3" />
+                      </Link>
+                    </td>
+                  </tr>
+                ))
+              )}
+            </tbody>
+          </table>
+        </div>
       </div>
 
       {/* Charts Row */}

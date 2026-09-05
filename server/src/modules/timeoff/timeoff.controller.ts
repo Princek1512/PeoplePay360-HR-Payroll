@@ -156,6 +156,35 @@ export const createRequest = async (req: Request, res: Response, next: NextFunct
     const end = new Date(endDate);
     const duration = Number(durationAmount);
 
+    if (start > end) {
+      return res.status(400).json({
+        success: false,
+        message: 'Start date cannot be after end date.'
+      });
+    }
+
+    // Check for overlapping/intersecting leave requests for this employee
+    const overlappingRequest = await prisma.timeOffRequest.findFirst({
+      where: {
+        employeeId,
+        status: { in: ['submitted', 'approved'] },
+        startDate: { lte: end },
+        endDate: { gte: start }
+      },
+      include: {
+        timeOffType: true
+      }
+    });
+
+    if (overlappingRequest) {
+      const existingStart = overlappingRequest.startDate.toISOString().split('T')[0];
+      const existingEnd = overlappingRequest.endDate.toISOString().split('T')[0];
+      return res.status(400).json({
+        success: false,
+        message: `Leave request dates overlap with an existing ${overlappingRequest.status} ${overlappingRequest.timeOffType.name} request (from ${existingStart} to ${existingEnd}). Overlapping leaves are not permitted.`
+      });
+    }
+
     const type = await prisma.timeOffType.findUnique({ where: { id: timeOffTypeId } });
     if (!type) {
       return res.status(404).json({ success: false, message: 'Time off type not found.' });

@@ -8,6 +8,7 @@ interface AttendanceContextType {
   elapsedSeconds: number;
   todayHours: number;
   isWidgetOpen: boolean;
+  lastPunchTimestamp: number;
   toggleWidget: () => void;
   setIsWidgetOpen: (open: boolean) => void;
   toggleCheckIn: () => Promise<void>;
@@ -23,6 +24,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
   const [todayHours, setTodayHours] = useState<number>(0);
   const [elapsedSeconds, setElapsedSeconds] = useState<number>(0);
   const [isWidgetOpen, setIsWidgetOpen] = useState<boolean>(false);
+  const [lastPunchTimestamp, setLastPunchTimestamp] = useState<number>(Date.now());
 
   const refreshStatus = useCallback(async () => {
     if (!isAuthenticated || !user?.employeeId) return;
@@ -71,6 +73,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
     try {
       await apiClient.post('/attendance/toggle');
       await refreshStatus();
+      setLastPunchTimestamp(Date.now());
     } catch (err: any) {
       alert(err.response?.data?.message || 'Error toggling attendance status.');
     }
@@ -86,6 +89,7 @@ export const AttendanceProvider: React.FC<{ children: ReactNode }> = ({ children
         elapsedSeconds,
         todayHours,
         isWidgetOpen,
+        lastPunchTimestamp,
         toggleWidget,
         setIsWidgetOpen,
         toggleCheckIn,

@@ -40,23 +40,16 @@ const ProtectedRoute: React.FC<{ module?: string; action?: 'read' | 'create' | '
   }
 
   if (module && !can(module, action)) {
-    // If regular employee tries to access dashboard or manager pages, redirect to their attendance/payslips
-    if (user?.roles.length === 1 && user?.roles[0] === 'Employee') {
-      return <Navigate to="/attendance" replace />;
-    }
     return <Navigate to="/dashboard" replace />;
   }
 
   return <Outlet />;
 };
 
-// Root index redirect based on role
+// Root index redirect
 const RootRedirect: React.FC = () => {
-  const { isAuthenticated, user } = useAuth();
+  const { isAuthenticated } = useAuth();
   if (!isAuthenticated) return <Navigate to="/login" replace />;
-  if (user?.roles.length === 1 && user?.roles[0] === 'Employee') {
-    return <Navigate to="/attendance" replace />;
-  }
   return <Navigate to="/dashboard" replace />;
 };
 
