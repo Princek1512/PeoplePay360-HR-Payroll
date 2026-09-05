@@ -12,6 +12,13 @@ export class ComputationContext {
   public workedDays: number;
   public totalDaysInPeriod: number;
   public attendanceHours: number;
+  public targetHours: number;
+  public regularHours: number;
+  public overtimeHours: number;
+  public hourlyRate: number;
+  public overtimeRate: number;
+  public regularPay: number;
+  public overtimePay: number;
   public timeOffDays: number;
 
   // Running category subtotals
@@ -29,18 +36,46 @@ export class ComputationContext {
     workedDays: number;
     totalDaysInPeriod?: number;
     attendanceHours?: number;
+    regularHours?: number;
+    overtimeHours?: number;
+    targetHours?: number;
     timeOffDays?: number;
   }) {
     this.contractWage = Number(params.contractWage) || 0;
     this.workedDays = Number(params.workedDays) || 30;
     this.totalDaysInPeriod = Number(params.totalDaysInPeriod) || 30;
     this.attendanceHours = Number(params.attendanceHours) || 0;
+    this.targetHours = Number(params.targetHours) || 160;
     this.timeOffDays = Number(params.timeOffDays) || 0;
 
-    // Default seed contract wage
+    // Shift Schedule & Attendance calculations
+    this.regularHours = params.regularHours !== undefined ? Number(params.regularHours) : Math.min(this.attendanceHours, this.targetHours);
+    this.overtimeHours = params.overtimeHours !== undefined ? Number(params.overtimeHours) : Math.max(0, this.attendanceHours - this.targetHours);
+
+    // Regular Hourly Rate
+    this.hourlyRate = this.targetHours > 0 ? this.contractWage / this.targetHours : 0;
+
+    // Reduced Overtime Hourly Rate (80% of regular hourly rate to motivate shift completion)
+    this.overtimeRate = this.hourlyRate * 0.8;
+
+    // Earned Regular Wage (1.0x rate for in-range core shift hours)
+    this.regularPay = Math.round((this.regularHours * this.hourlyRate + Number.EPSILON) * 100) / 100;
+
+    // Earned Overtime Pay (0.8x rate for out-of-range hours)
+    this.overtimePay = Math.round((this.overtimeHours * this.overtimeRate + Number.EPSILON) * 100) / 100;
+
+    // Register variables for formula evaluations
     this.ruleValues['WAGE'] = this.contractWage;
     this.ruleValues['WORKED_DAYS'] = this.workedDays;
     this.ruleValues['TOTAL_DAYS'] = this.totalDaysInPeriod;
+    this.ruleValues['TARGET_HOURS'] = this.targetHours;
+    this.ruleValues['ATTENDANCE_HOURS'] = this.attendanceHours;
+    this.ruleValues['REGULAR_HOURS'] = this.regularHours;
+    this.ruleValues['OVERTIME_HOURS'] = this.overtimeHours;
+    this.ruleValues['HOURLY_RATE'] = Math.round((this.hourlyRate + Number.EPSILON) * 100) / 100;
+    this.ruleValues['OVERTIME_RATE'] = Math.round((this.overtimeRate + Number.EPSILON) * 100) / 100;
+    this.ruleValues['REGULAR_PAY'] = this.regularPay;
+    this.ruleValues['OVERTIME_PAY'] = this.overtimePay;
   }
 
   public registerRuleResult(code: string, category: string, amount: number) {

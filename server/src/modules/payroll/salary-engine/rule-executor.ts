@@ -23,6 +23,11 @@ export interface ExecutionResult {
   }[];
   grossSalary: number;
   netSalary: number;
+  targetHours: number;
+  attendanceHours: number;
+  regularHours: number;
+  overtimeHours: number;
+  overtimeAmount: number;
   warnings: string[];
 }
 
@@ -34,6 +39,9 @@ export class SalaryRuleEngine {
       workedDays: number;
       totalDaysInPeriod?: number;
       attendanceHours?: number;
+      regularHours?: number;
+      overtimeHours?: number;
+      targetHours?: number;
       timeOffDays?: number;
     }
   ): ExecutionResult {
@@ -106,6 +114,11 @@ export class SalaryRuleEngine {
       lines,
       grossSalary: finalGross,
       netSalary: finalNet,
+      targetHours: context.targetHours,
+      attendanceHours: context.attendanceHours,
+      regularHours: context.regularHours,
+      overtimeHours: context.overtimeHours,
+      overtimeAmount: context.overtimePay,
       warnings
     };
   }

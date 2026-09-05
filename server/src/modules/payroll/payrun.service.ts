@@ -196,8 +196,20 @@ export class PayrollService {
         },
         payslips: {
           include: {
-            employee: true,
-            contract: true
+            employee: {
+              include: {
+                workingSchedule: {
+                  include: { lines: true }
+                }
+              }
+            },
+            contract: {
+              include: {
+                workingSchedule: {
+                  include: { lines: true }
+                }
+              }
+            }
           }
         }
       }
@@ -220,7 +232,7 @@ export class PayrollService {
 
     await prisma.$transaction(async (tx) => {
       for (const slip of payrun.payslips) {
-        // Calculate attendance & approved time off in period
+        // Fetch attendance entries in the pay period
         const attendances = await tx.attendance.findMany({
           where: {
             employeeId: slip.employeeId,
@@ -228,10 +240,63 @@ export class PayrollService {
           }
         });
 
-        let totalAttendanceHours = 0;
+        let totalRegularHours = 0;
+        let totalOvertimeHours = 0;
+
+        const schedule = slip.contract?.workingSchedule || slip.employee?.workingSchedule;
+        const scheduleLines = schedule?.lines || [];
+
         attendances.forEach((a) => {
-          totalAttendanceHours += a.workedHours ? Number(a.workedHours) : 8;
+          const checkIn = new Date(a.checkIn);
+          const checkOut = a.checkOut
+            ? new Date(a.checkOut)
+            : new Date(checkIn.getTime() + Number(a.workedHours || 8) * 3600000);
+          const actualHours = a.workedHours
+            ? Number(a.workedHours)
+            : (checkOut.getTime() - checkIn.getTime()) / 3600000;
+
+          // Check shift schedule line for this day of week (0=Sun, 1=Mon, ..., 6=Sat)
+          const dayOfWeek = checkIn.getDay();
+          const matchLine = scheduleLines.find((l) => l.dayOfWeek === dayOfWeek);
+
+          let inRangeHours = 0;
+
+          if (matchLine) {
+            const [startH, startM] = matchLine.startTime.split(':').map(Number);
+            const [endH, endM] = matchLine.endTime.split(':').map(Number);
+
+            const shiftStart = new Date(checkIn);
+            shiftStart.setHours(startH || 9, startM || 0, 0, 0);
+            const shiftEnd = new Date(checkIn);
+            shiftEnd.setHours(endH || 17, endM || 0, 0, 0);
+
+            const overlapStart = Math.max(checkIn.getTime(), shiftStart.getTime());
+            const overlapEnd = Math.min(checkOut.getTime(), shiftEnd.getTime());
+            const inRangeMs = Math.max(0, overlapEnd - overlapStart);
+            inRangeHours = Math.min(actualHours, inRangeMs / 3600000);
+          } else if (dayOfWeek >= 1 && dayOfWeek <= 5) {
+            // Default weekday shift window: 09:00 AM to 05:00 PM
+            const shiftStart = new Date(checkIn);
+            shiftStart.setHours(9, 0, 0, 0);
+            const shiftEnd = new Date(checkIn);
+            shiftEnd.setHours(17, 0, 0, 0);
+
+            const overlapStart = Math.max(checkIn.getTime(), shiftStart.getTime());
+            const overlapEnd = Math.min(checkOut.getTime(), shiftEnd.getTime());
+            const inRangeMs = Math.max(0, overlapEnd - overlapStart);
+            inRangeHours = Math.min(actualHours, inRangeMs / 3600000);
+          } else {
+            // Weekend work with no assigned schedule line -> 0 in-range hours
+            inRangeHours = 0;
+          }
+
+          const outOfRangeHours = Math.max(0, actualHours - inRangeHours);
+
+          totalRegularHours += inRangeHours;
+          totalOvertimeHours += outOfRangeHours;
         });
+
+        const totalAttendanceHours = totalRegularHours + totalOvertimeHours;
 
         const timeOffs = await tx.timeOffRequest.findMany({
           where: {
@@ -249,12 +314,21 @@ export class PayrollService {
 
         const workedDays = Math.max(0, 30 - totalTimeOffDays);
 
+        // Calculate Target Shift Hours (default 40h/week = 160h/month or 140h based on schedule)
+        const weeklyHours = slip.employee.workingSchedule?.totalWeeklyHours
+          ? Number(slip.employee.workingSchedule.totalWeeklyHours)
+          : 40;
+        const targetHours = Math.round((weeklyHours / 5) * 20); // 20 working days standard month
+
         // Run Rule Execution Pipeline
         const result = SalaryRuleEngine.execute(rules, {
           contractWage: Number(slip.contract.wagePerMonth),
           workedDays,
           totalDaysInPeriod: 30,
           attendanceHours: totalAttendanceHours,
+          regularHours: totalRegularHours,
+          overtimeHours: totalOvertimeHours,
+          targetHours,
           timeOffDays: totalTimeOffDays
         });
 
@@ -280,11 +354,16 @@ export class PayrollService {
           }))
         });
 
-        // Update Payslip
+        // Update Payslip with calculated attendance metrics
         await tx.payslip.update({
           where: { id: slip.id },
           data: {
             workedDays,
+            targetHours: result.targetHours,
+            attendanceHours: result.attendanceHours,
+            regularHours: result.regularHours,
+            overtimeHours: result.overtimeHours,
+            overtimeAmount: result.overtimeAmount,
             grossSalary: result.grossSalary,
             netSalary: result.netSalary,
             status: 'done',

@@ -142,6 +142,17 @@ async function main() {
     }
   });
 
+  const ruleOvertime = await prisma.salaryRule.create({
+    data: {
+      name: 'Overtime Pay (Reduced Rate 0.8x)',
+      code: 'OVERTIME',
+      category: 'allowance',
+      sequence: 45,
+      computationMethod: 'formula',
+      formula: 'OVERTIME_PAY'
+    }
+  });
+
   const ruleGross = await prisma.salaryRule.create({
     data: {
       name: 'Gross Salary',
@@ -149,7 +160,7 @@ async function main() {
       category: 'gross',
       sequence: 50,
       computationMethod: 'formula',
-      formula: 'BASIC + HRA + CONVEYANCE + SPECIAL'
+      formula: 'BASIC + HRA + CONVEYANCE + SPECIAL + OVERTIME'
     }
   });
 
@@ -188,7 +199,7 @@ async function main() {
   });
 
   // Attach Rules to Structure with Sequence
-  const orderedRules = [ruleBasic, ruleHra, ruleConveyance, ruleSpecial, ruleGross, rulePf, ruleTax, ruleNet];
+  const orderedRules = [ruleBasic, ruleHra, ruleConveyance, ruleSpecial, ruleOvertime, ruleGross, rulePf, ruleTax, ruleNet];
   for (const r of orderedRules) {
     await prisma.salaryStructureRule.create({
       data: {
@@ -427,14 +438,58 @@ async function main() {
     }
   });
 
-  // 12. Attendance records
-  for (let d = 1; d <= 5; d++) {
-    const checkIn = new Date(now.getFullYear(), now.getMonth(), d, 9, 0, 0);
-    const checkOut = new Date(now.getFullYear(), now.getMonth(), d, 18, 0, 0);
+  // 12. Attendance records for current month
+  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
+  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
+  // Seed 16 days of regular daytime shift attendance for empEngineer (David Chen) (120 hrs core shift)
+  for (let day = 1; day <= 16; day++) {
+    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
+    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 16, 30, 0); // 7.5h shift
     await prisma.attendance.create({
       data: {
         employeeId: empEngineer.id,
+        checkIn,
+        checkOut,
+        workedHours: 7.5,
+        status: 'normal'
+      }
+    });
+  }
+
+  // David Chen Overtime Entry 1: Sep 19, 7:00 PM to 11:30 PM (4.5 hrs out-of-range overtime)
+  const dcOt1Start = new Date(now.getFullYear(), 8, 19, 19, 0, 0);
+  const dcOt1End = new Date(now.getFullYear(), 8, 19, 23, 30, 0);
+  await prisma.attendance.create({
+    data: {
+      employeeId: empEngineer.id,
+      checkIn: dcOt1Start,
+      checkOut: dcOt1End,
+      workedHours: 4.5,
+      status: 'normal'
+    }
+  });
+
+  // David Chen Overtime Entry 2: Sep 20, 7:30 PM to Sep 21, 9:00 AM (13.5 hrs out-of-range overnight overtime)
+  const dcOt2Start = new Date(now.getFullYear(), 8, 20, 19, 30, 0);
+  const dcOt2End = new Date(now.getFullYear(), 8, 21, 9, 0, 0);
+  await prisma.attendance.create({
+    data: {
+      employeeId: empEngineer.id,
+      checkIn: dcOt2Start,
+      checkOut: dcOt2End,
+      workedHours: 13.5,
+      status: 'normal'
+    }
+  });
+
+  // Seed 20 days of attendance for empPayrollManager (Exact shift scenario: 8 hours per day = 160 hrs total)
+  for (let day = 1; day <= 20; day++) {
+    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
+    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift
+    await prisma.attendance.create({
+      data: {
+        employeeId: empPayrollManager.id,
         checkIn,
         checkOut,
         workedHours: 8.0,
@@ -443,33 +498,36 @@ async function main() {
     });
   }
 
-  // 13. Pre-create a Full Demo Payrun
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  // Seed 15 days of attendance for empHrManager (Under-time scenario: 120 hrs total vs 160h target)
+  for (let day = 1; day <= 15; day++) {
+    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
+    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift for 15 days = 120h
+    await prisma.attendance.create({
+      data: {
+        employeeId: empHrManager.id,
+        checkIn,
+        checkOut,
+        workedHours: 8.0,
+        status: 'normal'
+      }
+    });
+  }
 
+  // 13. Pre-create a Full Demo Payrun & Compute via Engine
   const demoPayrun = await prisma.payrun.create({
     data: {
       name: `Payroll ${now.toLocaleString('default', { month: 'long', year: 'numeric' })}`,
       salaryStructureId: standardStructure.id,
       periodStart: currentMonthStart,
       periodEnd: currentMonthEnd,
-      status: 'validated'
+      status: 'draft'
     }
   });
 
-  // Generate Payslips for valid employees in demo payrun
-  for (const c of contracts.slice(0, 4)) {
-    const wage = Number(c.wagePerMonth);
-    const basic = wage * 0.5;
-    const hra = basic * 0.4;
-    const conveyance = 250;
-    const special = wage - (basic + hra + conveyance);
-    const gross = basic + hra + conveyance + special;
-    const pf = basic * 0.12;
-    const tax = gross * 0.10;
-    const net = gross - (pf + tax);
-
-    const payslip = await prisma.payslip.create({
+  // Create initial payslips for running contracts
+  const eligibleContracts = contracts.filter((c) => c.employeeId !== empSales.id); // exclude blocking warning test
+  for (const c of eligibleContracts) {
+    await prisma.payslip.create({
       data: {
         payrunId: demoPayrun.id,
         employeeId: c.employeeId,
@@ -477,26 +535,17 @@ async function main() {
         periodStart: currentMonthStart,
         periodEnd: currentMonthEnd,
         workedDays: 30,
-        grossSalary: gross,
-        netSalary: net,
-        status: 'done',
-        hasWarning: false
+        grossSalary: 0,
+        netSalary: 0,
+        status: 'draft'
       }
     });
-
-    await prisma.payslipLine.createMany({
-      data: [
-        { payslipId: payslip.id, salaryRuleId: ruleBasic.id, label: 'Basic Salary', code: 'BASIC', category: 'basic', amount: basic, sequence: 10 },
-        { payslipId: payslip.id, salaryRuleId: ruleHra.id, label: 'House Rent Allowance (HRA)', code: 'HRA', category: 'allowance', amount: hra, sequence: 20 },
-        { payslipId: payslip.id, salaryRuleId: ruleConveyance.id, label: 'Conveyance Allowance', code: 'CONVEYANCE', category: 'allowance', amount: conveyance, sequence: 30 },
-        { payslipId: payslip.id, salaryRuleId: ruleSpecial.id, label: 'Special Allowance', code: 'SPECIAL', category: 'allowance', amount: special, sequence: 40 },
-        { payslipId: payslip.id, salaryRuleId: ruleGross.id, label: 'Gross Salary', code: 'GROSS', category: 'gross', amount: gross, sequence: 50 },
-        { payslipId: payslip.id, salaryRuleId: rulePf.id, label: 'Provident Fund (PF)', code: 'PF', category: 'deduction', amount: pf, sequence: 60 },
-        { payslipId: payslip.id, salaryRuleId: ruleTax.id, label: 'Tax Deducted at Source (TDS)', code: 'TAX', category: 'deduction', amount: tax, sequence: 70 },
-        { payslipId: payslip.id, salaryRuleId: ruleNet.id, label: 'Net Salary', code: 'NET', category: 'net', amount: net, sequence: 100 }
-      ]
-    });
   }
+
+  // Dynamically compute payrun with shift attendance calculation engine
+  const { PayrollService } = await import('../src/modules/payroll/payrun.service.js');
+  await PayrollService.computePayrun(demoPayrun.id);
+  await PayrollService.validatePayrun(demoPayrun.id);
 
   console.log('✅ Seed completed successfully!');
   console.log('📋 Demo Accounts created:');

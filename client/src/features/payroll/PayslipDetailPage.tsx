@@ -6,7 +6,11 @@ import { formatCurrency, formatDate } from '../../lib/formatters';
 import { PayslipPrintModal } from './PayslipPrintModal';
 import {
   ArrowLeft,
-  Printer
+  Printer,
+  Clock,
+  Award,
+  Zap,
+  Calendar
 } from 'lucide-react';
 
 export const PayslipDetailPage: React.FC = () => {
@@ -44,6 +48,13 @@ export const PayslipDetailPage: React.FC = () => {
   payslip.lines?.forEach((l: any) => {
     if (l.category === 'deduction') totalDeductions += Number(l.amount);
   });
+
+  const targetHours = Number(payslip.targetHours || 160);
+  const attendanceHours = Number(payslip.attendanceHours || 0);
+  const regularHours = Number(payslip.regularHours || Math.min(attendanceHours, targetHours));
+  const overtimeHours = Number(payslip.overtimeHours || Math.max(0, attendanceHours - targetHours));
+  const overtimeAmount = Number(payslip.overtimeAmount || 0);
+  const hourlyRate = targetHours > 0 ? Number(payslip.contract?.wagePerMonth || 0) / targetHours : 0;
 
   return (
     <div className="space-y-6 max-w-4xl mx-auto font-sans">
@@ -89,6 +100,51 @@ export const PayslipDetailPage: React.FC = () => {
             <div>Payrun: <strong className="text-foreground">{payslip.payrun?.name}</strong></div>
             <div>Period: <strong>{formatDate(payslip.periodStart)}</strong> to <strong>{formatDate(payslip.periodEnd)}</strong></div>
             <div>Worked Days: <strong className="text-emerald-700 dark:text-emerald-400">{Number(payslip.workedDays)} days</strong></div>
+          </div>
+        </div>
+
+        {/* Shift & Campus Attendance Audit */}
+        <div className="p-5 rounded-xl bg-amber-500/10 border border-amber-500/20 space-y-3">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Clock className="w-4 h-4 text-amber-600 dark:text-amber-400" />
+              <span className="text-xs font-bold uppercase tracking-wider text-foreground">
+                Shift Schedule & Campus Attendance Audit
+              </span>
+            </div>
+            <span className="px-2.5 py-0.5 rounded-full bg-amber-500/20 text-amber-800 dark:text-amber-300 text-[10px] font-bold font-mono">
+              Overtime Rate Policy: 0.8x Regular Rate
+            </span>
+          </div>
+
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 pt-1 text-xs">
+            <div className="p-2.5 rounded-lg bg-card/70 border border-border">
+              <span className="text-[10px] text-muted-foreground block uppercase font-mono">Scheduled Shift</span>
+              <span className="font-bold font-mono text-foreground">{targetHours.toFixed(1)} hrs</span>
+              <span className="text-[10px] text-muted-foreground block">({formatCurrency(hourlyRate)}/hr)</span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-card/70 border border-border">
+              <span className="text-[10px] text-muted-foreground block uppercase font-mono">Campus Attended</span>
+              <span className="font-bold font-mono text-foreground">{attendanceHours.toFixed(1)} hrs</span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-semibold">
+                {attendanceHours >= targetHours ? 'Full Shift Completed' : `${(targetHours - attendanceHours).toFixed(1)}h Under-time`}
+              </span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-card/70 border border-border">
+              <span className="text-[10px] text-muted-foreground block uppercase font-mono">Regular Hours Paid</span>
+              <span className="font-bold font-mono text-emerald-700 dark:text-emerald-400">{regularHours.toFixed(1)} hrs</span>
+              <span className="text-[10px] text-muted-foreground block">Core Shift Hours</span>
+            </div>
+
+            <div className="p-2.5 rounded-lg bg-card/70 border border-border">
+              <span className="text-[10px] text-muted-foreground block uppercase font-mono">Overtime Hours</span>
+              <span className="font-bold font-mono text-amber-700 dark:text-amber-400">+{overtimeHours.toFixed(1)} hrs</span>
+              <span className="text-[10px] text-amber-600 dark:text-amber-400 block font-semibold">
+                {overtimeHours > 0 ? formatCurrency(overtimeAmount) : 'No OT'}
+              </span>
+            </div>
           </div>
         </div>
 

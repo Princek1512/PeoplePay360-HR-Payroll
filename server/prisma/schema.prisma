@@ -279,16 +279,21 @@ model Payslip {
   contract       Contract      @relation(fields: [contractId], references: [id], onDelete: Restrict)
   periodStart    DateTime
   periodEnd      DateTime
-  workedDays     Decimal       @default(30.0) @db.Decimal(5, 2)
-  grossSalary    Decimal       @default(0.00) @db.Decimal(12, 2)
-  netSalary      Decimal       @default(0.00) @db.Decimal(12, 2)
-  status         String        @default("draft") // "draft", "done", "paid"
-  hasWarning     Boolean       @default(false)
-  warningMessage String?
-  sentAt         DateTime?
-  lines          PayslipLine[]
-  createdAt      DateTime      @default(now())
-  updatedAt      DateTime      @updatedAt
+  workedDays      Decimal       @default(30.0) @db.Decimal(5, 2)
+  targetHours     Decimal       @default(160.00) @db.Decimal(7, 2)
+  attendanceHours Decimal       @default(0.00) @db.Decimal(7, 2)
+  regularHours    Decimal       @default(0.00) @db.Decimal(7, 2)
+  overtimeHours   Decimal       @default(0.00) @db.Decimal(7, 2)
+  overtimeAmount  Decimal       @default(0.00) @db.Decimal(12, 2)
+  grossSalary     Decimal       @default(0.00) @db.Decimal(12, 2)
+  netSalary       Decimal       @default(0.00) @db.Decimal(12, 2)
+  status          String        @default("draft") // "draft", "done", "paid"
+  hasWarning      Boolean       @default(false)
+  warningMessage  String?
+  sentAt          DateTime?
+  lines           PayslipLine[]
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
 
   @@unique([payrunId, employeeId])
   @@index([employeeId, periodStart, periodEnd])
