@@ -35,7 +35,7 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
       if (employeeType && employeeType !== 'All Types') attendanceWhere.employee.employmentType = String(employeeType);
     }
 
-    const [allPayslips, paidPayslips, activeEmployeesCount, approvedTimeOffs, attendanceRecords] =
+    const [allPayslips, paidPayslips, activeEmployeesCount, approvedTimeOffs, attendanceRecords, timeOffTypes] =
       await Promise.all([
         prisma.payslip.findMany({ where: payslipWhere, select: { status: true, hasWarning: true, netSalary: true } }),
         prisma.payslip.findMany({
@@ -49,7 +49,17 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
         }),
         prisma.attendance.findMany({
           where: attendanceWhere,
-          select: { status: true, workedHours: true }
+          select: { status: true, workedHours: true, checkIn: true, checkOut: true }
+        }),
+        prisma.timeOffType.findMany({
+          include: {
+            requests: {
+              where: departmentId ? { employee: { departmentId: String(departmentId) } } : {}
+            },
+            allocations: {
+              where: departmentId ? { employee: { departmentId: String(departmentId) } } : {}
+            }
+          }
         })
       ]);
 
@@ -73,10 +83,32 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
     );
 
     const normalAttendances = attendanceRecords.filter((a) => a.status === 'normal').length;
+    const lateAttendances = attendanceRecords.filter((a) => a.status === 'late').length;
+    const absentAttendances = attendanceRecords.filter((a) => a.status === 'absent').length;
+    const overtimeAttendances = attendanceRecords.filter((a) => a.status === 'overtime' || Number(a.workedHours) > 8).length;
+    const missingCheckouts = attendanceRecords.filter((a) => !a.checkOut && a.checkIn).length;
+
     const attendanceHealthPercent =
       attendanceRecords.length > 0
         ? Math.round(((normalAttendances / attendanceRecords.length) * 100 + Number.EPSILON) * 10) / 10
         : 100;
+
+    const timeOffOverview = timeOffTypes.map((tot) => {
+      const approved = tot.requests
+        .filter((r) => r.status === 'approved')
+        .reduce((acc, r) => acc + Number(r.durationAmount), 0);
+      const pending = tot.requests.filter((r) => r.status === 'pending').length;
+      const totalAllocated = tot.allocations.reduce((acc, a) => acc + Number(a.allocatedDays), 0);
+      const totalUsed = tot.allocations.reduce((acc, a) => acc + Number(a.usedDays), 0);
+      const rem = Math.max(0, totalAllocated - totalUsed);
+
+      return {
+        type: tot.name,
+        approvedDays: approved,
+        pending,
+        remainingBalance: rem > 0 ? `${rem} Days` : 'N/A'
+      };
+    });
 
     return res.json({
       success: true,
@@ -86,7 +118,17 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
         avgSalaryPerEmployee,
         approvedTimeOffDays,
         attendanceHealthPercent,
-        activeHeadcount: activeEmployeesCount
+        activeHeadcount: activeEmployeesCount,
+        attendanceOverview: {
+          present: normalAttendances,
+          late: lateAttendances,
+          absent: absentAttendances,
+          overtime: overtimeAttendances,
+          missingCheckouts,
+          manualEdits: Math.max(0, attendanceRecords.length - normalAttendances - absentAttendances),
+          coveragePercent: attendanceHealthPercent
+        },
+        timeOffOverview
       }
     });
   } catch (err) {

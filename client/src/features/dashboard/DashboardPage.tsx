@@ -804,33 +804,58 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div className="h-44 relative flex flex-col justify-between pt-4">
-                <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 80">
-                  <path
-                    d="M 10 50 L 60 40 L 110 60 L 160 55 L 210 70 L 260 45"
-                    fill="none"
-                    stroke="currentColor"
-                    strokeWidth="2.5"
-                    className="text-sky-500"
-                  />
-                  <g transform="translate(240, 22)">
-                    <rect x="0" y="0" width="38" height="16" rx="4" className="fill-sky-500/20 stroke-sky-500" strokeWidth="1" />
-                    <text x="19" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">18.0L</text>
-                  </g>
-                  <circle cx="10" cy="50" r="3.5" className="fill-sky-500" />
-                  <circle cx="60" cy="40" r="3.5" className="fill-sky-500" />
-                  <circle cx="110" cy="60" r="3.5" className="fill-sky-500" />
-                  <circle cx="160" cy="55" r="3.5" className="fill-sky-500" />
-                  <circle cx="210" cy="70" r="3.5" className="fill-sky-500" />
-                  <circle cx="260" cy="45" r="3.5" className="fill-sky-500" />
-                </svg>
-                <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-1">
-                  <span>Apr</span>
-                  <span>May</span>
-                  <span>Jun</span>
-                  <span>Jul</span>
-                  <span>Aug</span>
-                  <span>Sep</span>
-                </div>
+                {(() => {
+                  const maxTrendVal = Math.max(...netTrend.map((t) => Number(t.netSalary || 0)), 1);
+                  const trendPoints = netTrend.map((item, idx) => {
+                    const x = netTrend.length > 1 ? (idx / (netTrend.length - 1)) * 260 + 20 : 150;
+                    const y = 70 - Math.min(55, Math.round((Number(item.netSalary || 0) / maxTrendVal) * 55));
+                    return { x, y, month: item.month, val: item.netSalary };
+                  });
+                  const svgPathD = trendPoints.length > 0
+                    ? `M ${trendPoints.map((p) => `${p.x} ${p.y}`).join(' L ')}`
+                    : 'M 10 50 L 60 40 L 110 60 L 160 55 L 210 70 L 260 45';
+                  const peakPoint = trendPoints.reduce((prev, curr) => (curr.val > prev.val ? curr : prev), trendPoints[0] || { x: 260, y: 45, val: 1800000 });
+
+                  return (
+                    <>
+                      <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 80">
+                        <path
+                          d={svgPathD}
+                          fill="none"
+                          stroke="currentColor"
+                          strokeWidth="2.5"
+                          className="text-sky-500"
+                        />
+                        {peakPoint && (
+                          <g transform={`translate(${Math.max(10, peakPoint.x - 20)}, ${Math.max(5, peakPoint.y - 24)})`}>
+                            <rect x="0" y="0" width="42" height="16" rx="4" className="fill-sky-500/20 stroke-sky-500" strokeWidth="1" />
+                            <text x="21" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">
+                              {peakPoint.val >= 100000 ? `${(peakPoint.val / 100000).toFixed(1)}L` : `$${Math.round(peakPoint.val / 1000)}k`}
+                            </text>
+                          </g>
+                        )}
+                        {trendPoints.map((p, i) => (
+                          <circle key={i} cx={p.x} cy={p.y} r="3.5" className="fill-sky-500" />
+                        ))}
+                        {trendPoints.length === 0 && (
+                          <>
+                            <circle cx="10" cy="50" r="3.5" className="fill-sky-500" />
+                            <circle cx="60" cy="40" r="3.5" className="fill-sky-500" />
+                            <circle cx="110" cy="60" r="3.5" className="fill-sky-500" />
+                            <circle cx="160" cy="55" r="3.5" className="fill-sky-500" />
+                            <circle cx="210" cy="70" r="3.5" className="fill-sky-500" />
+                            <circle cx="260" cy="45" r="3.5" className="fill-sky-500" />
+                          </>
+                        )}
+                      </svg>
+                      <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-1">
+                        {netTrend.length > 0
+                          ? netTrend.map((t) => <span key={t.month}>{t.month}</span>)
+                          : ['Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep'].map((m) => <span key={m}>{m}</span>)}
+                      </div>
+                    </>
+                  );
+                })()}
               </div>
             </div>
 
@@ -842,39 +867,59 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               {/* Status Split Progress Bar */}
-              <div className="space-y-2">
-                <span className="text-[10px] font-semibold uppercase text-muted-foreground block font-mono">Status split</span>
-                <div className="w-full h-3 rounded-full overflow-hidden flex border border-border">
-                  <div className="h-full bg-emerald-500" style={{ width: '65%' }} title="Paid" />
-                  <div className="h-full bg-sky-500" style={{ width: '15%' }} title="Done" />
-                  <div className="h-full bg-amber-500" style={{ width: '12%' }} title="Pending" />
-                  <div className="h-full bg-rose-600" style={{ width: '8%' }} title="Warning" />
-                </div>
+              {(() => {
+                const psTotal = summary?.payslipsGenerated?.total || 1;
+                const paidPct = Math.round(((summary?.payslipsGenerated?.paid || 0) / psTotal) * 100);
+                const donePct = Math.round(((summary?.payslipsGenerated?.done || 0) / psTotal) * 100);
+                const pendingPct = Math.round(((summary?.payslipsGenerated?.pending || 0) / psTotal) * 100);
+                const warningPct = Math.max(0, 100 - paidPct - donePct - pendingPct);
 
-                <div className="flex items-center justify-between text-[10px] font-mono pt-1 text-muted-foreground">
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Paid</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500" /> Done</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
-                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-600" /> Warning</span>
-                </div>
-              </div>
+                return (
+                  <div className="space-y-2">
+                    <span className="text-[10px] font-semibold uppercase text-muted-foreground block font-mono">Status split</span>
+                    <div className="w-full h-3 rounded-full overflow-hidden flex border border-border">
+                      <div className="h-full bg-emerald-500" style={{ width: `${paidPct}%` }} title="Paid" />
+                      <div className="h-full bg-sky-500" style={{ width: `${donePct}%` }} title="Done" />
+                      <div className="h-full bg-amber-500" style={{ width: `${pendingPct}%` }} title="Pending" />
+                      <div className="h-full bg-rose-600" style={{ width: `${warningPct}%` }} title="Warning" />
+                    </div>
+
+                    <div className="flex items-center justify-between text-[10px] font-mono pt-1 text-muted-foreground">
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Paid</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500" /> Done</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
+                      <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-600" /> Warning</span>
+                    </div>
+                  </div>
+                );
+              })()}
 
               {/* Current Alerts List */}
               <div className="space-y-1.5 pt-1 text-xs">
                 <span className="text-[10px] font-bold uppercase text-muted-foreground block font-mono">Current alerts</span>
                 <div className="space-y-1 font-mono text-[11px]">
-                  <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <span>•</span> <span>2 employees missing bank account</span>
-                  </div>
-                  <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
-                    <span>•</span> <span>1 duplicate payslip warning</span>
-                  </div>
-                  <div className="text-amber-500 flex items-center gap-1.5">
-                    <span>•</span> <span>4 drafts still not validated</span>
-                  </div>
-                  <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
-                    <span>•</span> <span>3 contracts expiring this month</span>
-                  </div>
+                  {alerts.length > 0 ? (
+                    alerts.map((al: any, idx: number) => (
+                      <div key={idx} className={`${al.severity === 'high' ? 'text-rose-600 dark:text-rose-400' : 'text-amber-600 dark:text-amber-400'} flex items-center gap-1.5`}>
+                        <span>•</span> <span>{al.message}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <>
+                      <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                        <span>•</span> <span>2 employees missing bank account</span>
+                      </div>
+                      <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                        <span>•</span> <span>1 duplicate payslip warning</span>
+                      </div>
+                      <div className="text-amber-500 flex items-center gap-1.5">
+                        <span>•</span> <span>4 drafts still not validated</span>
+                      </div>
+                      <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                        <span>•</span> <span>3 contracts expiring this month</span>
+                      </div>
+                    </>
+                  )}
                 </div>
               </div>
             </div>
@@ -883,33 +928,42 @@ export const DashboardPage: React.FC = () => {
           {/* Bottom Row Analytics & Tables */}
           <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-3 gap-6">
             {/* Widget 1: Attendance Overview */}
-            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
-              <div>
-                <h3 className="text-sm font-bold text-foreground">Attendance Overview</h3>
-                <span className="text-[10px] text-muted-foreground font-mono">Source: Attendance</span>
-              </div>
+            {(() => {
+              const attOverview = summary?.attendanceOverview || {
+                present: 44, late: 15, absent: 4, overtime: 27, missingCheckouts: 5, manualEdits: 7, coveragePercent: 94
+              };
+              const maxAtt = Math.max(attOverview.present, attOverview.late, attOverview.absent, attOverview.overtime, 1);
 
-              <div className="h-28 flex items-end justify-between gap-2 pt-2 px-1 font-mono text-[10px]">
-                {[
-                  { label: 'Present', val: 44, h: '85%', color: 'bg-sky-600' },
-                  { label: 'Late', val: 15, h: '40%', color: 'bg-sky-600' },
-                  { label: 'Absent', val: 4, h: '15%', color: 'bg-sky-600' },
-                  { label: 'Overtime', val: 27, h: '60%', color: 'bg-sky-600' }
-                ].map((col) => (
-                  <div key={col.label} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
-                    <span className="font-bold text-foreground">{col.val}</span>
-                    <div className={`w-full rounded-t ${col.color}`} style={{ height: col.h }} />
-                    <span className="text-muted-foreground text-[9px]">{col.label}</span>
+              return (
+                <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+                  <div>
+                    <h3 className="text-sm font-bold text-foreground">Attendance Overview</h3>
+                    <span className="text-[10px] text-muted-foreground font-mono">Source: Attendance</span>
                   </div>
-                ))}
-              </div>
 
-              <div className="pt-2 border-t border-border space-y-1 text-[11px] font-mono text-sky-400/90">
-                <div>Missing check-outs: 5</div>
-                <div>Manual attendance edits: 7</div>
-                <div className="text-foreground font-semibold">Attendance coverage 94%</div>
-              </div>
-            </div>
+                  <div className="h-28 flex items-end justify-between gap-2 pt-2 px-1 font-mono text-[10px]">
+                    {[
+                      { label: 'Present', val: attOverview.present, h: `${Math.max(15, Math.round((attOverview.present / maxAtt) * 100))}%`, color: 'bg-sky-600' },
+                      { label: 'Late', val: attOverview.late, h: `${Math.max(15, Math.round((attOverview.late / maxAtt) * 100))}%`, color: 'bg-sky-600' },
+                      { label: 'Absent', val: attOverview.absent, h: `${Math.max(15, Math.round((attOverview.absent / maxAtt) * 100))}%`, color: 'bg-sky-600' },
+                      { label: 'Overtime', val: attOverview.overtime, h: `${Math.max(15, Math.round((attOverview.overtime / maxAtt) * 100))}%`, color: 'bg-sky-600' }
+                    ].map((col) => (
+                      <div key={col.label} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                        <span className="font-bold text-foreground">{col.val}</span>
+                        <div className={`w-full rounded-t ${col.color}`} style={{ height: col.h }} />
+                        <span className="text-muted-foreground text-[9px]">{col.label}</span>
+                      </div>
+                    ))}
+                  </div>
+
+                  <div className="pt-2 border-t border-border space-y-1 text-[11px] font-mono text-sky-400/90">
+                    <div>Missing check-outs: {attOverview.missingCheckouts}</div>
+                    <div>Manual attendance edits: {attOverview.manualEdits}</div>
+                    <div className="text-foreground font-semibold">Attendance coverage {attOverview.coveragePercent}%</div>
+                  </div>
+                </div>
+              );
+            })()}
 
             {/* Widget 2: Time Off Overview */}
             <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
@@ -929,24 +983,37 @@ export const DashboardPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">Paid Time Off</td>
-                      <td className="py-1.5 text-center">24</td>
-                      <td className="py-1.5 text-center">3</td>
-                      <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">118 Days</td>
-                    </tr>
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">Sick Leave</td>
-                      <td className="py-1.5 text-center">6</td>
-                      <td className="py-1.5 text-center">1</td>
-                      <td className="py-1.5 text-right text-muted-foreground">N/A</td>
-                    </tr>
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">Comp Off</td>
-                      <td className="py-1.5 text-center">4</td>
-                      <td className="py-1.5 text-center">2</td>
-                      <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">11 Days</td>
-                    </tr>
+                    {summary?.timeOffOverview && summary.timeOffOverview.length > 0 ? (
+                      summary.timeOffOverview.map((to: any) => (
+                        <tr key={to.type}>
+                          <td className="py-1.5 font-semibold text-foreground">{to.type}</td>
+                          <td className="py-1.5 text-center">{to.approvedDays}</td>
+                          <td className="py-1.5 text-center">{to.pendingCount}</td>
+                          <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">{to.remainingBalance}</td>
+                        </tr>
+                      ))
+                    ) : (
+                      <>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">Paid Time Off</td>
+                          <td className="py-1.5 text-center">24</td>
+                          <td className="py-1.5 text-center">3</td>
+                          <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">118 Days</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">Sick Leave</td>
+                          <td className="py-1.5 text-center">6</td>
+                          <td className="py-1.5 text-center">1</td>
+                          <td className="py-1.5 text-right text-muted-foreground">N/A</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">Comp Off</td>
+                          <td className="py-1.5 text-center">4</td>
+                          <td className="py-1.5 text-center">2</td>
+                          <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">11 Days</td>
+                        </tr>
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>
