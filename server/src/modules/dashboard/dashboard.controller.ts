@@ -96,7 +96,14 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
 
 export const getSalaryCostByDepartment = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { departmentId } = req.query;
+    const deptWhere: any = {};
+    if (departmentId) {
+      deptWhere.id = String(departmentId);
+    }
+
     const departments = await prisma.department.findMany({
+      where: deptWhere,
       include: {
         employees: {
           where: { status: 'active' },
@@ -134,10 +141,17 @@ export const getSalaryCostByDepartment = async (req: Request, res: Response, nex
 
 export const getNetSalaryTrend = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { departmentId } = req.query;
+    const payslipWhere: any = {};
+    if (departmentId) {
+      payslipWhere.employee = { departmentId: String(departmentId) };
+    }
+
     const payruns = await prisma.payrun.findMany({
       orderBy: { periodStart: 'asc' },
       include: {
         payslips: {
+          where: payslipWhere,
           select: { netSalary: true, grossSalary: true }
         }
       },
@@ -165,10 +179,14 @@ export const getNetSalaryTrend = async (req: Request, res: Response, next: NextF
 
 export const getPayrollAlerts = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { departmentId } = req.query;
+    const empWhere: any = { status: 'active' };
+    if (departmentId) empWhere.departmentId = String(departmentId);
+
     const [missingBank, expiringContracts, openAttendances] = await Promise.all([
       prisma.employee.findMany({
         where: {
-          status: 'active',
+          ...empWhere,
           OR: [{ bankAccountNumber: null }, { bankAccountNumber: '' }]
         },
         select: { id: true, name: true, email: true }
@@ -176,6 +194,7 @@ export const getPayrollAlerts = async (req: Request, res: Response, next: NextFu
       prisma.contract.findMany({
         where: {
           status: 'running',
+          ...(departmentId ? { employee: { departmentId: String(departmentId) } } : {}),
           endDate: {
             not: null,
             lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000)
@@ -186,6 +205,7 @@ export const getPayrollAlerts = async (req: Request, res: Response, next: NextFu
       prisma.attendance.findMany({
         where: {
           checkOut: null,
+          ...(departmentId ? { employee: { departmentId: String(departmentId) } } : {}),
           checkIn: { lte: new Date(Date.now() - 12 * 60 * 60 * 1000) }
         },
         include: { employee: { select: { id: true, name: true } } }
@@ -232,7 +252,14 @@ export const getPayrollAlerts = async (req: Request, res: Response, next: NextFu
 
 export const getDepartmentOverview = async (req: Request, res: Response, next: NextFunction) => {
   try {
+    const { departmentId } = req.query;
+    const deptWhere: any = {};
+    if (departmentId) {
+      deptWhere.id = String(departmentId);
+    }
+
     const departments = await prisma.department.findMany({
+      where: deptWhere,
       include: {
         manager: { select: { id: true, name: true } },
         employees: {

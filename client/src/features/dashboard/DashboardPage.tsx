@@ -44,7 +44,6 @@ export const DashboardPage: React.FC = () => {
   // --- Manager/Admin State ---
   const [activeTab, setActiveTab] = useState('Payroll');
   const [selectedPeriod, setSelectedPeriod] = useState('All Periods');
-  const [selectedType, setSelectedType] = useState('All Types');
   const [summary, setSummary] = useState<any>(null);
   const [deptCosts, setDeptCosts] = useState<any[]>([]);
   const [netTrend, setNetTrend] = useState<any[]>([]);
@@ -66,15 +65,13 @@ export const DashboardPage: React.FC = () => {
   const fetchManagerData = async () => {
     try {
       setLoading(true);
-      const params: any = {};
-      if (selectedDept) params.departmentId = selectedDept;
-      if (selectedType && selectedType !== 'All Types') params.employeeType = selectedType;
+      const params = { departmentId: selectedDept || undefined };
 
       const [sumRes, costRes, trendRes, alertRes, deptRes, payrunRes, empRes] = await Promise.all([
         apiClient.get('/dashboard/summary', { params }),
-        apiClient.get('/dashboard/salary-cost-by-department'),
-        apiClient.get('/dashboard/net-salary-trend'),
-        apiClient.get('/dashboard/alerts'),
+        apiClient.get('/dashboard/salary-cost-by-department', { params }),
+        apiClient.get('/dashboard/net-salary-trend', { params }),
+        apiClient.get('/dashboard/alerts', { params }),
         apiClient.get('/dashboard/departments'),
         apiClient.get('/payruns'),
         apiClient.get('/employees', { params: { departmentId: selectedDept || undefined } })
@@ -126,7 +123,7 @@ export const DashboardPage: React.FC = () => {
     } else {
       fetchPersonalEmployeeData();
     }
-  }, [isManagerOrAdmin, selectedDept, selectedType, selectedPeriod, user?.employeeId]);
+  }, [isManagerOrAdmin, selectedDept, selectedPeriod, user?.employeeId]);
 
   const maxDeptCost = Math.max(...deptCosts.map((d) => d.salaryCost), 1);
   const maxTrend = Math.max(...netTrend.map((t) => Math.max(t.grossSalary, t.netSalary)), 1);
@@ -678,20 +675,6 @@ export const DashboardPage: React.FC = () => {
               </select>
             </div>
 
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground uppercase">Employee Type</span>
-              <select
-                value={selectedType}
-                onChange={(e) => setSelectedType(e.target.value)}
-                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
-              >
-                <option value="All Types">All Types</option>
-                <option value="Full-time">Full-time</option>
-                <option value="Contractor">Contractor</option>
-                <option value="Part-time">Part-time</option>
-              </select>
-            </div>
-
             <div className="flex items-center gap-2 sm:ml-auto">
               <span className="text-[10px] text-muted-foreground uppercase">Company</span>
               <span className="px-3 py-1.5 rounded-md bg-secondary border border-border font-bold text-foreground">
@@ -778,22 +761,38 @@ export const DashboardPage: React.FC = () => {
               </div>
 
               <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-b border-border font-mono text-[10px]">
-                {[
-                  { dept: 'HR', val: '$110k', height: '65%' },
-                  { dept: 'Sales', val: '$150k', height: '85%' },
-                  { dept: 'Support', val: '$90k', height: '50%' },
-                  { dept: 'Finance', val: '$120k', height: '70%' },
-                  { dept: 'IT', val: '$170k', height: '95%' }
-                ].map((bar) => (
-                  <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
-                    <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
-                    <div
-                      className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
-                      style={{ height: bar.height }}
-                    />
-                    <span className="text-muted-foreground font-semibold uppercase text-[9px]">{bar.dept}</span>
-                  </div>
-                ))}
+                {deptCosts.length > 0
+                  ? deptCosts.map((bar) => {
+                      const costVal = Number(bar.salaryCost || 0);
+                      const heightPct = maxDeptCost > 0 ? Math.max(20, Math.round((costVal / maxDeptCost) * 100)) : 20;
+                      const formattedVal = costVal >= 1000 ? `$${(costVal / 1000).toFixed(0)}k` : `$${costVal}`;
+                      return (
+                        <div key={bar.departmentId || bar.department} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                          <span className="text-[10px] font-bold text-sky-400">{formattedVal}</span>
+                          <div
+                            className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
+                            style={{ height: `${heightPct}%` }}
+                          />
+                          <span className="text-muted-foreground font-semibold uppercase text-[9px] truncate max-w-[55px]">{bar.department}</span>
+                        </div>
+                      );
+                    })
+                  : [
+                      { dept: 'HR', val: '$110k', height: '65%' },
+                      { dept: 'Sales', val: '$150k', height: '85%' },
+                      { dept: 'Support', val: '$90k', height: '50%' },
+                      { dept: 'Finance', val: '$120k', height: '70%' },
+                      { dept: 'IT', val: '$170k', height: '95%' }
+                    ].map((bar) => (
+                      <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                        <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
+                        <div
+                          className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
+                          style={{ height: bar.height }}
+                        />
+                        <span className="text-muted-foreground font-semibold uppercase text-[9px]">{bar.dept}</span>
+                      </div>
+                    ))}
               </div>
             </div>
 
@@ -970,26 +969,40 @@ export const DashboardPage: React.FC = () => {
                     </tr>
                   </thead>
                   <tbody className="divide-y divide-border/60">
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">IT</td>
-                      <td className="py-1.5 text-center">18</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">$4.2L</td>
-                    </tr>
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">Sales</td>
-                      <td className="py-1.5 text-center">22</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">$5.1L</td>
-                    </tr>
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">HR</td>
-                      <td className="py-1.5 text-center">5</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">$1.4L</td>
-                    </tr>
-                    <tr>
-                      <td className="py-1.5 font-semibold text-foreground">Support</td>
-                      <td className="py-1.5 text-center">14</td>
-                      <td className="py-1.5 text-right font-bold text-foreground">$3.3L</td>
-                    </tr>
+                    {deptCosts.length > 0 ? (
+                      deptCosts.map((d) => (
+                        <tr key={d.departmentId || d.department}>
+                          <td className="py-1.5 font-semibold text-foreground">{d.department}</td>
+                          <td className="py-1.5 text-center">{d.headcount}</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">
+                            {formatCurrency(d.salaryCost)}
+                          </td>
+                        </tr>
+                      ))
+                    ) : (
+                      <>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">IT</td>
+                          <td className="py-1.5 text-center">18</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">$4.2L</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">Sales</td>
+                          <td className="py-1.5 text-center">22</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">$5.1L</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">HR</td>
+                          <td className="py-1.5 text-center">5</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">$1.4L</td>
+                        </tr>
+                        <tr>
+                          <td className="py-1.5 font-semibold text-foreground">Support</td>
+                          <td className="py-1.5 text-center">14</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">$3.3L</td>
+                        </tr>
+                      </>
+                    )}
                   </tbody>
                 </table>
               </div>
