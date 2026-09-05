@@ -92,8 +92,7 @@ export const UserModal: React.FC<UserModalProps> = ({
     UserRoleType.EMPLOYEE,
     UserRoleType.HR_MANAGER,
     UserRoleType.HR_PAYROLL_USER,
-    UserRoleType.HR_PAYROLL_MANAGER,
-    UserRoleType.ADMIN
+    UserRoleType.HR_PAYROLL_MANAGER
   ];
 
   return (

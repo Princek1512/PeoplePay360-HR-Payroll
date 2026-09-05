@@ -77,6 +77,34 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
     setLoading(true);
     setError(null);
 
+    // --- Validations ---
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!emailRegex.test(email)) {
+      setError("Please enter a valid email address (e.g., name@domain.com).");
+      setLoading(false);
+      return;
+    }
+
+    if (phone) {
+      // Strictly 10 digits, stripping out common formatting characters for checking just in case, but expecting 10 digits
+      const digitsOnly = phone.replace(/\D/g, '');
+      if (digitsOnly.length !== 10) {
+        setError("Phone number must be exactly 10 digits.");
+        setLoading(false);
+        return;
+      }
+    }
+
+    if (panNumber) {
+      const panRegex = /^[A-Z]{5}[0-9]{4}[A-Z]{1}$/;
+      if (!panRegex.test(panNumber)) {
+        setError("PAN number must be valid (e.g. ABCDE1234F).");
+        setLoading(false);
+        return;
+      }
+    }
+    // -------------------
+
     const payload = {
       name,
       email,
@@ -158,8 +186,9 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               type="text"
               value={phone}
               onChange={(e) => setPhone(e.target.value)}
-              placeholder="+1 (555) 012-3456"
+              placeholder="9876543210"
               className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              required
             />
           </div>
 
@@ -171,6 +200,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={departmentId}
               onChange={(e) => setDepartmentId(e.target.value)}
               className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              required
             >
               <option value="">-- Select Department --</option>
               {departments.map((d) => (
@@ -189,6 +219,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={workingScheduleId}
               onChange={(e) => setWorkingScheduleId(e.target.value)}
               className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              required
             >
               <option value="">-- Select Schedule --</option>
               {schedules.map((s) => (
@@ -207,6 +238,7 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               value={status}
               onChange={(e) => setStatus(e.target.value)}
               className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring"
+              required
             >
               <option value="active">Active</option>
               <option value="inactive">Inactive</option>
@@ -266,8 +298,9 @@ export const EmployeeModal: React.FC<EmployeeModalProps> = ({
               <input
                 type="text"
                 value={panNumber}
-                onChange={(e) => setPanNumber(e.target.value)}
+                onChange={(e) => setPanNumber(e.target.value.toUpperCase())}
                 placeholder="ABCDE1234F"
+                maxLength={10}
                 className="w-full bg-background border border-input rounded-md px-3.5 py-2 text-sm text-foreground focus:outline-none focus:ring-1 focus:ring-ring font-mono"
               />
             </div>
