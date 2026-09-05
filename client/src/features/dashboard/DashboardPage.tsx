@@ -151,57 +151,7 @@ export const DashboardPage: React.FC = () => {
 
   return (
     <div className="space-y-8 font-sans">
-      {/* Header Bar */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border">
-        <div>
-          <div className="flex items-center gap-2">
-            <LayoutDashboard className="w-5 h-5 text-primary" />
-            <h1 className="text-2xl font-bold text-foreground tracking-tight">
-              {isManagerOrAdmin ? 'Main Dashboard' : 'My Employee Dashboard'}
-            </h1>
-          </div>
-          <p className="text-xs text-muted-foreground mt-1">
-            {isManagerOrAdmin
-              ? 'Real-time live aggregation across Employees, Contracts, Schedules, Attendance, and Payruns.'
-              : 'Personal employee profile, live attendance clock, compensation baseline, and leave records.'}
-          </p>
-        </div>
 
-        {/* Live Attendance Punch Action - AVAILABLE FOR ALL ROLES */}
-        <div className="flex items-center gap-3">
-          <div className="px-3.5 py-1.5 rounded-lg bg-card border border-border text-left shadow-sm">
-            <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
-              Today's Attendance
-            </span>
-            <div className="flex items-center gap-2">
-              <span className={`w-2 h-2 rounded-full ${isCheckedIn ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'}`} />
-              <span className="text-xs font-bold text-foreground font-mono">
-                {isCheckedIn ? `${todayHours.toFixed(1)} hrs (Clocked In)` : 'Clocked Out'}
-              </span>
-            </div>
-          </div>
-
-          <button
-            type="button"
-            onClick={async () => {
-              await toggleCheckIn();
-              if (isManagerOrAdmin) {
-                fetchManagerData();
-              } else {
-                fetchPersonalEmployeeData();
-              }
-            }}
-            className={`flex items-center gap-2 px-4 py-2 rounded-md text-xs font-semibold shadow-sm transition-all ${
-              isCheckedIn
-                ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-            }`}
-          >
-            <Clock className="w-3.5 h-3.5" />
-            <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
-          </button>
-        </div>
-      </div>
 
       {/* ========================================================================= */}
       {/* REGULAR EMPLOYEE VIEW: SHOW ONLY THE DETAILS OF THE LOGGED IN USER        */}
