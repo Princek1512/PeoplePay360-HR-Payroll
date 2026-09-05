@@ -22,7 +22,7 @@ async function main() {
   // Define default limits
   const defaultAllocations: Record<string, number> = {
     'Paid Time Off (PTO)': 20.0,
-    'Sick / Medical Leave': 10.0
+    'Sick / Medical Leave': 20.0
   };
 
   const employees = await prisma.employee.findMany();
