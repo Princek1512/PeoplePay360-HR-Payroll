@@ -3,16 +3,36 @@ import { prisma } from '../../config/db.js';
 
 export const getDashboardSummary = async (req: Request, res: Response, next: NextFunction) => {
   try {
-    const { departmentId, periodStart, periodEnd } = req.query;
+    const { departmentId, employeeType, periodStart, periodEnd } = req.query;
 
     const payslipWhere: any = {};
-    if (departmentId) {
-      payslipWhere.employee = { departmentId: String(departmentId) };
+    if (departmentId || (employeeType && employeeType !== 'All Types')) {
+      payslipWhere.employee = {};
+      if (departmentId) payslipWhere.employee.departmentId = String(departmentId);
+      if (employeeType && employeeType !== 'All Types') payslipWhere.employee.employmentType = String(employeeType);
     }
     if (periodStart || periodEnd) {
       payslipWhere.periodStart = {};
       if (periodStart) payslipWhere.periodStart.gte = new Date(String(periodStart));
       if (periodEnd) payslipWhere.periodStart.lte = new Date(String(periodEnd));
+    }
+
+    const employeeWhere: any = { status: 'active' };
+    if (departmentId) employeeWhere.departmentId = String(departmentId);
+    if (employeeType && employeeType !== 'All Types') employeeWhere.employmentType = String(employeeType);
+
+    const timeOffWhere: any = { status: 'approved' };
+    if (departmentId || (employeeType && employeeType !== 'All Types')) {
+      timeOffWhere.employee = {};
+      if (departmentId) timeOffWhere.employee.departmentId = String(departmentId);
+      if (employeeType && employeeType !== 'All Types') timeOffWhere.employee.employmentType = String(employeeType);
+    }
+
+    const attendanceWhere: any = {};
+    if (departmentId || (employeeType && employeeType !== 'All Types')) {
+      attendanceWhere.employee = {};
+      if (departmentId) attendanceWhere.employee.departmentId = String(departmentId);
+      if (employeeType && employeeType !== 'All Types') attendanceWhere.employee.employmentType = String(employeeType);
     }
 
     const [allPayslips, paidPayslips, activeEmployeesCount, approvedTimeOffs, attendanceRecords] =
@@ -22,23 +42,13 @@ export const getDashboardSummary = async (req: Request, res: Response, next: Nex
           where: { ...payslipWhere, status: 'paid' },
           select: { netSalary: true }
         }),
-        prisma.employee.count({
-          where: {
-            status: 'active',
-            ...(departmentId ? { departmentId: String(departmentId) } : {})
-          }
-        }),
+        prisma.employee.count({ where: employeeWhere }),
         prisma.timeOffRequest.findMany({
-          where: {
-            status: 'approved',
-            ...(departmentId ? { employee: { departmentId: String(departmentId) } } : {})
-          },
+          where: timeOffWhere,
           select: { durationAmount: true }
         }),
         prisma.attendance.findMany({
-          where: {
-            ...(departmentId ? { employee: { departmentId: String(departmentId) } } : {})
-          },
+          where: attendanceWhere,
           select: { status: true, workedHours: true }
         })
       ]);

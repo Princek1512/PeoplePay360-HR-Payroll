@@ -43,13 +43,14 @@ export const DashboardPage: React.FC = () => {
 
   // --- Manager/Admin State ---
   const [activeTab, setActiveTab] = useState('Payroll');
-  const [selectedPeriod, setSelectedPeriod] = useState('Sep 2026');
+  const [selectedPeriod, setSelectedPeriod] = useState('All Periods');
   const [selectedType, setSelectedType] = useState('All Types');
   const [summary, setSummary] = useState<any>(null);
   const [deptCosts, setDeptCosts] = useState<any[]>([]);
   const [netTrend, setNetTrend] = useState<any[]>([]);
   const [alerts, setAlerts] = useState<any[]>([]);
   const [departments, setDepartments] = useState<any[]>([]);
+  const [payruns, setPayruns] = useState<any[]>([]);
   const [employees, setEmployees] = useState<any[]>([]);
   const [selectedDept, setSelectedDept] = useState('');
   const [employeeSearch, setEmployeeSearch] = useState('');
@@ -65,12 +66,17 @@ export const DashboardPage: React.FC = () => {
   const fetchManagerData = async () => {
     try {
       setLoading(true);
-      const [sumRes, costRes, trendRes, alertRes, deptRes, empRes] = await Promise.all([
-        apiClient.get('/dashboard/summary', { params: { departmentId: selectedDept || undefined } }),
+      const params: any = {};
+      if (selectedDept) params.departmentId = selectedDept;
+      if (selectedType && selectedType !== 'All Types') params.employeeType = selectedType;
+
+      const [sumRes, costRes, trendRes, alertRes, deptRes, payrunRes, empRes] = await Promise.all([
+        apiClient.get('/dashboard/summary', { params }),
         apiClient.get('/dashboard/salary-cost-by-department'),
         apiClient.get('/dashboard/net-salary-trend'),
         apiClient.get('/dashboard/alerts'),
         apiClient.get('/dashboard/departments'),
+        apiClient.get('/payruns'),
         apiClient.get('/employees', { params: { departmentId: selectedDept || undefined } })
       ]);
 
@@ -79,6 +85,7 @@ export const DashboardPage: React.FC = () => {
       setNetTrend(trendRes.data.data || []);
       setAlerts(alertRes.data.data || []);
       setDepartments(deptRes.data.data || []);
+      setPayruns(payrunRes.data.data || []);
       setEmployees(empRes.data.data || []);
     } catch (err) {
       console.error('Failed to load manager dashboard data:', err);
@@ -119,7 +126,7 @@ export const DashboardPage: React.FC = () => {
     } else {
       fetchPersonalEmployeeData();
     }
-  }, [isManagerOrAdmin, selectedDept, user?.employeeId]);
+  }, [isManagerOrAdmin, selectedDept, selectedType, selectedPeriod, user?.employeeId]);
 
   const maxDeptCost = Math.max(...deptCosts.map((d) => d.salaryCost), 1);
   const maxTrend = Math.max(...netTrend.map((t) => Math.max(t.grossSalary, t.netSalary)), 1);
@@ -224,11 +231,10 @@ export const DashboardPage: React.FC = () => {
                 <button
                   type="button"
                   onClick={toggleCheckIn}
-                  className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-xs font-semibold shadow-sm transition-all ${
-                    isCheckedIn
-                      ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                      : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
+                  className={`flex items-center gap-2 px-5 py-2.5 rounded-md text-xs font-semibold shadow-sm transition-all ${isCheckedIn
+                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
+                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
+                    }`}
                 >
                   <Clock className="w-4 h-4" />
                   <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
@@ -293,9 +299,8 @@ export const DashboardPage: React.FC = () => {
               <div>
                 <div className="flex items-center gap-2">
                   <span
-                    className={`w-2.5 h-2.5 rounded-full ${
-                      isCheckedIn ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'
-                    }`}
+                    className={`w-2.5 h-2.5 rounded-full ${isCheckedIn ? 'bg-emerald-500 animate-pulse' : 'bg-muted-foreground/50'
+                      }`}
                   />
                   <span className="font-serif text-lg font-bold text-foreground">
                     {isCheckedIn ? 'Clocked In' : 'Clocked Out'}
@@ -632,38 +637,13 @@ export const DashboardPage: React.FC = () => {
       {/* ========================================================================= */}
       {isManagerOrAdmin && (
         <div className="space-y-6 font-sans">
-          {/* Header Subtitle & Challenge Note */}
-          <div className="space-y-2 pb-4 border-b border-border">
-            <div className="text-[11px] font-mono text-muted-foreground italic">
-              Dashboard challenge: combine Payroll with HR data from multiple models and present useful insights with cards, charts, and summaries.
-            </div>
-
-            {/* Sub Navigation Pills Bar */}
-            <div className="flex items-center gap-1.5 pt-1">
-              {['HR', 'Employees', 'Attendance', 'Time Off', 'Payroll'].map((tab) => (
-                <button
-                  key={tab}
-                  type="button"
-                  onClick={() => setActiveTab(tab)}
-                  className={`px-3 py-1 rounded-md text-xs font-semibold font-mono transition-all ${
-                    activeTab === tab
-                      ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30'
-                      : 'text-muted-foreground hover:text-foreground bg-secondary/40'
-                  }`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-
-            <div className="pt-2">
-              <h1 className="text-2xl font-bold text-foreground tracking-tight">
-                Payroll Dashboard
-              </h1>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                Dashboard should help payroll/HR users understand payments, staffing impact, leave patterns, and attendance quality for the selected period.
-              </p>
-            </div>
+          <div className="pb-4 border-b border-border">
+            <h1 className="text-2xl font-bold text-foreground tracking-tight">
+              Payroll Dashboard
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Dashboard should help payroll/HR users understand payments, staffing impact, leave patterns, and attendance quality for the selected period.
+            </p>
           </div>
 
           {/* Filter Bar */}
@@ -675,9 +655,19 @@ export const DashboardPage: React.FC = () => {
                 onChange={(e) => setSelectedPeriod(e.target.value)}
                 className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
               >
-                <option value="Sep 2026">Sep 2026</option>
-                <option value="Aug 2026">Aug 2026</option>
-                <option value="Jul 2026">Jul 2026</option>
+                <option value="All Periods">All Periods</option>
+                {payruns.map((p) => (
+                  <option key={p.id} value={p.name}>
+                    {p.name}
+                  </option>
+                ))}
+                {payruns.length === 0 && (
+                  <>
+                    <option value="Sep 2026">Sep 2026</option>
+                    <option value="Aug 2026">Aug 2026</option>
+                    <option value="Jul 2026">Jul 2026</option>
+                  </>
+                )}
               </select>
             </div>
 
@@ -707,6 +697,7 @@ export const DashboardPage: React.FC = () => {
                 <option value="All Types">All Types</option>
                 <option value="Full-time">Full-time</option>
                 <option value="Contractor">Contractor</option>
+                <option value="Part-time">Part-time</option>
               </select>
             </div>
 
