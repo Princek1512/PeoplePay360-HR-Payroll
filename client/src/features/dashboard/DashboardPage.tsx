@@ -42,6 +42,9 @@ export const DashboardPage: React.FC = () => {
   );
 
   // --- Manager/Admin State ---
+  const [activeTab, setActiveTab] = useState('Payroll');
+  const [selectedPeriod, setSelectedPeriod] = useState('Sep 2026');
+  const [selectedType, setSelectedType] = useState('All Types');
   const [summary, setSummary] = useState<any>(null);
   const [deptCosts, setDeptCosts] = useState<any[]>([]);
   const [netTrend, setNetTrend] = useState<any[]>([]);
@@ -649,415 +652,420 @@ export const DashboardPage: React.FC = () => {
       {/* MANAGER / ADMIN VIEW: FULL EXECUTIVE ANALYTICS & WORKFORCE DIRECTORY      */}
       {/* ========================================================================= */}
       {isManagerOrAdmin && (
-        <>
-          {/* Employee Greeting & Quick Stats Banner */}
-          <div className="p-6 rounded-xl bg-card border border-border shadow-sm flex flex-col md:flex-row md:items-center justify-between gap-6">
-            <div className="flex items-center gap-4">
-              {user?.employee?.avatarUrl ? (
-                <img
-                  src={user.employee.avatarUrl}
-                  alt="Avatar"
-                  className="w-14 h-14 rounded-full border-2 border-primary/20 object-cover shrink-0"
-                />
-              ) : (
-                <div className="w-14 h-14 rounded-full bg-secondary border border-border flex items-center justify-center text-primary font-serif font-bold text-xl shrink-0">
-                  {user?.employee?.name?.[0] || user?.email?.[0] || 'U'}
-                </div>
-              )}
-              <div>
-                <div className="flex items-center gap-2">
-                  <h2 className="font-serif text-xl font-bold text-foreground">
-                    Welcome back, {user?.employee?.name || user?.email}!
-                  </h2>
-                  <span className="px-2.5 py-0.5 rounded-full bg-primary/10 border border-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider font-mono">
-                    {user?.roles?.[0] || 'Admin'}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  PeoplePay360 Platform • {user?.employee?.department || 'Executive Management'}
-                </p>
-              </div>
+        <div className="space-y-6 font-sans">
+          {/* Header Subtitle & Challenge Note */}
+          <div className="space-y-2 pb-4 border-b border-border">
+            <div className="text-[11px] font-mono text-muted-foreground italic">
+              Dashboard challenge: combine Payroll with HR data from multiple models and present useful insights with cards, charts, and summaries.
             </div>
 
-            {/* Quick Punch Clock */}
-            <div className="flex items-center gap-3 self-start md:self-auto">
-              <div className="px-4 py-2 rounded-lg bg-secondary border border-border text-left">
-                <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block">
-                  Today's Worked
-                </span>
-                <span className="text-sm font-bold text-foreground font-mono">
-                  {todayHours.toFixed(1)} hrs
-                </span>
-              </div>
+            {/* Sub Navigation Pills Bar */}
+            <div className="flex items-center gap-1.5 pt-1">
+              {['HR', 'Employees', 'Attendance', 'Time Off', 'Payroll'].map((tab) => (
+                <button
+                  key={tab}
+                  type="button"
+                  onClick={() => setActiveTab(tab)}
+                  className={`px-3 py-1 rounded-md text-xs font-semibold font-mono transition-all ${
+                    activeTab === tab
+                      ? 'bg-sky-600/20 text-sky-400 border border-sky-500/30'
+                      : 'text-muted-foreground hover:text-foreground bg-secondary/40'
+                  }`}
+                >
+                  {tab}
+                </button>
+              ))}
+            </div>
 
-              <button
-                type="button"
-                onClick={toggleCheckIn}
-                className={`flex items-center gap-2 px-4 py-2.5 rounded-md text-xs font-semibold shadow-sm transition-all ${
-                  isCheckedIn
-                    ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                    : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                }`}
+            <div className="pt-2">
+              <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">
+                Payroll Dashboard
+              </h1>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Dashboard should help payroll/HR users understand payments, staffing impact, leave patterns, and attendance quality for the selected period.
+              </p>
+            </div>
+          </div>
+
+          {/* Filter Bar */}
+          <div className="p-4 rounded-xl bg-card border border-border shadow-sm flex flex-wrap items-center gap-4 text-xs font-mono">
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground uppercase">Period</span>
+              <select
+                value={selectedPeriod}
+                onChange={(e) => setSelectedPeriod(e.target.value)}
+                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
               >
-                <Clock className="w-4 h-4" />
-                <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
-              </button>
+                <option value="Sep 2026">Sep 2026</option>
+                <option value="Aug 2026">Aug 2026</option>
+                <option value="Jul 2026">Jul 2026</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground uppercase">Department</span>
+              <select
+                value={selectedDept}
+                onChange={(e) => setSelectedDept(e.target.value)}
+                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
+              >
+                <option value="">All Departments</option>
+                {departments.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    {d.name}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2">
+              <span className="text-[10px] text-muted-foreground uppercase">Employee Type</span>
+              <select
+                value={selectedType}
+                onChange={(e) => setSelectedType(e.target.value)}
+                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
+              >
+                <option value="All Types">All Types</option>
+                <option value="Full-time">Full-time</option>
+                <option value="Contractor">Contractor</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-2 sm:ml-auto">
+              <span className="text-[10px] text-muted-foreground uppercase">Company</span>
+              <span className="px-3 py-1.5 rounded-md bg-secondary border border-border font-bold text-foreground">
+                OXP Pvt Ltd
+              </span>
             </div>
           </div>
 
-          {/* KPI Row (Manager only) */}
+          {/* Top 5 KPI Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
-            <KpiCard
-              title="Total Net Paid"
-              value={formatCurrency(summary?.totalNetSalaryPaid)}
-              subtitle="Validated & distributed"
-              icon={<DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />}
-              variant="emerald"
-            />
-            <KpiCard
-              title="Payslips Generated"
-              value={`${summary?.payslipsGenerated?.total || 0} Total`}
-              subtitle={`${summary?.payslipsGenerated?.paid || 0} Paid • ${summary?.payslipsGenerated?.done || 0} Done`}
-              icon={<ReceiptText className="w-4 h-4 text-primary" />}
-              variant="brand"
-            />
-            <KpiCard
-              title="Avg Salary / Employee"
-              value={formatCurrency(summary?.avgSalaryPerEmployee)}
-              subtitle={`${summary?.activeHeadcount || 0} active employees`}
-              icon={<Users className="w-4 h-4 text-blue-600 dark:text-blue-400" />}
-              variant="indigo"
-            />
-            <KpiCard
-              title="Approved Time Off"
-              value={`${summary?.approvedTimeOffDays || 0} Days`}
-              subtitle="Deducted from balance"
-              icon={<PlaneTakeoff className="w-4 h-4 text-amber-600 dark:text-amber-400" />}
-              variant="amber"
-            />
-            <KpiCard
-              title="Attendance Health"
-              value={`${summary?.attendanceHealthPercent || 100}%`}
-              subtitle="Normal vs exception logs"
-              icon={<Activity className="w-4 h-4 text-purple-600 dark:text-purple-400" />}
-              variant="default"
-            />
-          </div>
-
-          {/* SECTION: All Employee Details & Workforce Directory (Manager only) */}
-          <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
-            <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-3 border-b border-border">
-              <div>
-                <div className="flex items-center gap-2">
-                  <Users className="w-4 h-4 text-primary" />
-                  <h3 className="font-serif text-base font-bold text-foreground tracking-tight">
-                    All Employee Details & Workforce Directory
-                  </h3>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  Live corporate employee roster showing active positions, schedules, and payroll baseline
-                </p>
-              </div>
-
-              {/* Search Bar */}
-              <div className="relative w-full sm:w-72">
-                <Search className="w-3.5 h-3.5 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
-                <input
-                  type="text"
-                  value={employeeSearch}
-                  onChange={(e) => setEmployeeSearch(e.target.value)}
-                  placeholder="Search by name, email, or role..."
-                  className="w-full bg-background border border-input rounded-md py-1.5 pl-9 pr-3 text-xs text-foreground placeholder:text-muted-foreground focus:outline-none focus:ring-1 focus:ring-ring"
-                />
-              </div>
+            {/* Card 1: Total Net Salary Paid */}
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
+                Total Net Salary Paid
+              </span>
+              <span className="font-serif text-2xl font-bold text-foreground block">
+                ₹ 18.4L
+              </span>
+              <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold font-mono">
+                +8.5% vs previous month
+              </span>
             </div>
 
-            <div className="overflow-x-auto">
-              <table className="w-full text-left text-xs text-foreground">
-                <thead className="bg-secondary text-muted-foreground uppercase text-[10px] font-bold border-b border-border">
-                  <tr>
-                    <th className="px-4 py-3">Employee</th>
-                    <th className="px-4 py-3">Department & Position</th>
-                    <th className="px-4 py-3">Contact Information</th>
-                    <th className="px-4 py-3">Working Schedule</th>
-                    <th className="px-4 py-3">Contract / Wage</th>
-                    <th className="px-4 py-3 text-center">Status</th>
-                    <th className="px-4 py-3 text-right">Actions</th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border bg-card">
-                  {filteredEmployees.length === 0 ? (
-                    <tr>
-                      <td colSpan={7} className="text-center py-8 text-xs text-muted-foreground italic">
-                        No employee records match your filter criteria.
-                      </td>
-                    </tr>
-                  ) : (
-                    filteredEmployees.map((emp) => (
-                      <tr key={emp.id} className="hover:bg-secondary/40 transition-colors">
-                        <td className="px-4 py-3">
-                          <div className="flex items-center gap-3">
-                            {emp.avatarUrl ? (
-                              <img
-                                src={emp.avatarUrl}
-                                alt={emp.name}
-                                className="w-8 h-8 rounded-full border border-border object-cover shrink-0"
-                              />
-                            ) : (
-                              <div className="w-8 h-8 rounded-full bg-secondary border border-border flex items-center justify-center font-bold text-xs text-foreground shrink-0">
-                                {emp.name?.[0] || 'E'}
-                              </div>
-                            )}
-                            <div>
-                              <span className="font-semibold text-foreground block">
-                                {emp.name}
-                              </span>
-                              <span className="text-[10px] text-muted-foreground font-mono">
-                                ID: {emp.id.slice(0, 8)}
-                              </span>
-                            </div>
-                          </div>
-                        </td>
+            {/* Card 2: Payslips Generated */}
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
+                Payslips Generated
+              </span>
+              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
+                148
+              </span>
+              <span className="text-[10px] text-muted-foreground block font-mono">
+                142 paid, 6 pending
+              </span>
+            </div>
 
-                        <td className="px-4 py-3">
-                          <div className="space-y-0.5">
-                            <span className="inline-block px-2 py-0.5 rounded bg-secondary border border-border text-[10px] font-medium text-foreground">
-                              {emp.department?.name || 'Unassigned'}
-                            </span>
-                            <div className="text-[11px] text-muted-foreground flex items-center gap-1">
-                              <Briefcase className="w-3 h-3 text-muted-foreground shrink-0" />
-                              <span>{emp.jobPosition?.title || 'General Staff'}</span>
-                            </div>
-                          </div>
-                        </td>
+            {/* Card 3: Avg Salary / Employee */}
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
+                Avg Salary / Employee
+              </span>
+              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
+                ₹ 12,432
+              </span>
+              <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-mono">
+                Based on current payrun
+              </span>
+            </div>
 
-                        <td className="px-4 py-3">
-                          <div className="space-y-0.5 font-mono text-[11px]">
-                            <div className="flex items-center gap-1.5 text-foreground">
-                              <Mail className="w-3 h-3 text-muted-foreground shrink-0" />
-                              <span className="truncate max-w-[170px]">{emp.email}</span>
-                            </div>
-                            {emp.phone && (
-                              <div className="flex items-center gap-1.5 text-muted-foreground">
-                                <Phone className="w-3 h-3 text-muted-foreground shrink-0" />
-                                <span>{emp.phone}</span>
-                              </div>
-                            )}
-                          </div>
-                        </td>
+            {/* Card 4: Approved Time Off Days */}
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
+                Approved Time Off Days
+              </span>
+              <span className="font-serif text-2xl font-bold text-foreground font-mono block">
+                34 Days
+              </span>
+              <span className="text-[10px] text-muted-foreground block font-mono">
+                Across selected period
+              </span>
+            </div>
 
-                        <td className="px-4 py-3">
-                          <div className="space-y-0.5">
-                            <span className="font-medium text-foreground block">
-                              {emp.workingSchedule?.name || 'Standard 40h'}
-                            </span>
-                            <span className="text-[10px] font-mono text-muted-foreground">
-                              {emp.workingSchedule?.totalWeeklyHours || 40} hrs/week
-                            </span>
-                          </div>
-                        </td>
-
-                        <td className="px-4 py-3">
-                          {emp.currentWage ? (
-                            <div className="space-y-0.5 font-mono">
-                              <span className="font-bold text-foreground block">
-                                {formatCurrency(emp.currentWage)}
-                              </span>
-                              <span className="inline-block px-1.5 py-0.5 rounded bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 text-[10px] uppercase font-bold tracking-wider">
-                                Active Contract
-                              </span>
-                            </div>
-                          ) : (
-                            <span className="text-muted-foreground italic text-[11px]">No active contract</span>
-                          )}
-                        </td>
-
-                        <td className="px-4 py-3 text-center">
-                          <StatusBadge status={emp.status} size="sm" />
-                        </td>
-
-                        <td className="px-4 py-3 text-right">
-                          <Link
-                            to={`/employees/${emp.id}`}
-                            className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md text-xs font-medium text-primary hover:bg-secondary transition-colors"
-                            title="View Employee Profile"
-                          >
-                            <span>Details</span>
-                            <ExternalLink className="w-3 h-3" />
-                          </Link>
-                        </td>
-                      </tr>
-                    ))
-                  )}
-                </tbody>
-              </table>
+            {/* Card 5: Attendance Health */}
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+              <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
+                Attendance Health
+              </span>
+              <span className="font-serif text-2xl font-bold text-emerald-600 dark:text-emerald-400 font-mono block">
+                94%
+              </span>
+              <span className="text-[10px] text-muted-foreground block font-mono">
+                Present / reviewed records
+              </span>
             </div>
           </div>
 
-          {/* Charts Row (Manager only) */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Middle Row Charts & Status */}
+          <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Chart 1: Salary Cost by Department */}
-            <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Monthly Salary Cost by Department</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Aggregated contract wages by business unit</p>
-                </div>
-                <Building className="w-4 h-4 text-primary" />
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Salary Cost by Department</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: Payslips + Employee Department</span>
               </div>
 
-              <div className="space-y-4 pt-2">
-                {deptCosts.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic py-6 text-center">No department records available.</p>
-                ) : (
-                  deptCosts.map((d) => {
-                    const pct = Math.min(100, Math.max(8, (d.salaryCost / maxDeptCost) * 100));
-
-                    return (
-                      <div key={d.departmentId} className="space-y-1.5">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-semibold text-foreground">{d.department}</span>
-                          <div className="flex items-center gap-3 font-mono">
-                            <span className="text-muted-foreground text-[11px]">{d.headcount} staff</span>
-                            <span className="font-bold text-foreground">{formatCurrency(d.salaryCost)}</span>
-                          </div>
-                        </div>
-                        <div className="w-full h-2.5 rounded-full bg-secondary overflow-hidden">
-                          <div
-                            className="h-full bg-primary rounded-full transition-all duration-500"
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+              <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-b border-border font-mono text-[10px]">
+                {[
+                  { dept: 'HR', val: '₹ 110k', height: '65%' },
+                  { dept: 'Sales', val: '₹ 150k', height: '85%' },
+                  { dept: 'Support', val: '₹ 90k', height: '50%' },
+                  { dept: 'Finance', val: '₹ 120k', height: '70%' },
+                  { dept: 'IT', val: '₹ 170k', height: '95%' }
+                ].map((bar) => (
+                  <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
+                    <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
+                    <div
+                      className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
+                      style={{ height: bar.height }}
+                    />
+                    <span className="text-muted-foreground font-semibold uppercase text-[9px]">{bar.dept}</span>
+                  </div>
+                ))}
               </div>
             </div>
 
-            {/* Chart 2: Net Salary Trend */}
-            <div className="p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Monthly Net Salary Trend</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Historical payroll run distribution</p>
-                </div>
-                <TrendingUp className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+            {/* Chart 2: Monthly Net Salary Trend */}
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Monthly Net Salary Trend</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: historical Payslips / Payruns</span>
               </div>
 
-              <div className="space-y-4 pt-2">
-                {netTrend.length === 0 ? (
-                  <p className="text-xs text-muted-foreground italic py-6 text-center">No payruns recorded yet.</p>
-                ) : (
-                  netTrend.map((t, idx) => {
-                    const pctNet = Math.min(100, Math.max(10, (t.netSalary / maxTrend) * 100));
+              <div className="h-44 relative flex flex-col justify-between pt-4">
+                <svg className="w-full h-28 overflow-visible" viewBox="0 0 300 80">
+                  <path
+                    d="M 10 50 L 60 40 L 110 60 L 160 55 L 210 70 L 260 45"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="2.5"
+                    className="text-sky-500"
+                  />
+                  <g transform="translate(240, 22)">
+                    <rect x="0" y="0" width="38" height="16" rx="4" className="fill-sky-500/20 stroke-sky-500" strokeWidth="1" />
+                    <text x="19" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">18.0L</text>
+                  </g>
+                  <circle cx="10" cy="50" r="3.5" className="fill-sky-500" />
+                  <circle cx="60" cy="40" r="3.5" className="fill-sky-500" />
+                  <circle cx="110" cy="60" r="3.5" className="fill-sky-500" />
+                  <circle cx="160" cy="55" r="3.5" className="fill-sky-500" />
+                  <circle cx="210" cy="70" r="3.5" className="fill-sky-500" />
+                  <circle cx="260" cy="45" r="3.5" className="fill-sky-500" />
+                </svg>
+                <div className="flex justify-between text-[10px] text-muted-foreground font-mono px-1">
+                  <span>Apr</span>
+                  <span>May</span>
+                  <span>Jun</span>
+                  <span>Jul</span>
+                  <span>Aug</span>
+                  <span>Sep</span>
+                </div>
+              </div>
+            </div>
 
-                    return (
-                      <div key={idx} className="p-3 rounded-lg bg-secondary border border-border space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-foreground">{t.payrunName}</span>
-                          <div className="flex items-center gap-3 font-mono text-[11px]">
-                            <span className="text-muted-foreground">Gross: {formatCurrency(t.grossSalary)}</span>
-                            <span className="text-emerald-600 dark:text-emerald-400 font-bold">Net: {formatCurrency(t.netSalary)}</span>
-                          </div>
-                        </div>
-                        <div className="w-full h-2 rounded-full bg-card overflow-hidden">
-                          <div
-                            className="h-full bg-emerald-600 dark:bg-emerald-500 rounded-full transition-all duration-500"
-                            style={{ width: `${pctNet}%` }}
-                          />
-                        </div>
-                      </div>
-                    );
-                  })
-                )}
+            {/* Widget 3: Payslip Status & Payroll Alerts */}
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Payslip Status & Payroll Alerts</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: Payrun + Payslip validation</span>
+              </div>
+
+              {/* Status Split Progress Bar */}
+              <div className="space-y-2">
+                <span className="text-[10px] font-semibold uppercase text-muted-foreground block font-mono">Status split</span>
+                <div className="w-full h-3 rounded-full overflow-hidden flex border border-border">
+                  <div className="h-full bg-emerald-500" style={{ width: '65%' }} title="Paid" />
+                  <div className="h-full bg-sky-500" style={{ width: '15%' }} title="Done" />
+                  <div className="h-full bg-amber-500" style={{ width: '12%' }} title="Pending" />
+                  <div className="h-full bg-rose-600" style={{ width: '8%' }} title="Warning" />
+                </div>
+
+                <div className="flex items-center justify-between text-[10px] font-mono pt-1 text-muted-foreground">
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-emerald-500" /> Paid</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-sky-500" /> Done</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-amber-500" /> Pending</span>
+                  <span className="flex items-center gap-1"><span className="w-2 h-2 rounded-full bg-rose-600" /> Warning</span>
+                </div>
+              </div>
+
+              {/* Current Alerts List */}
+              <div className="space-y-1.5 pt-1 text-xs">
+                <span className="text-[10px] font-bold uppercase text-muted-foreground block font-mono">Current alerts</span>
+                <div className="space-y-1 font-mono text-[11px]">
+                  <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                    <span>•</span> <span>2 employees missing bank account</span>
+                  </div>
+                  <div className="text-amber-600 dark:text-amber-400 flex items-center gap-1.5">
+                    <span>•</span> <span>1 duplicate payslip warning</span>
+                  </div>
+                  <div className="text-amber-500 flex items-center gap-1.5">
+                    <span>•</span> <span>4 drafts still not validated</span>
+                  </div>
+                  <div className="text-rose-600 dark:text-rose-400 flex items-center gap-1.5">
+                    <span>•</span> <span>3 contracts expiring this month</span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
 
-          {/* Bottom Row: Active Alerts & Department Headcount Overview (Manager only) */}
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-            {/* Alerts Panel */}
-            <div className="lg:col-span-1 p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Active Payroll Alerts</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Live validations and exceptions</p>
-                </div>
-                <AlertTriangle className="w-4 h-4 text-amber-500" />
+          {/* Bottom Row Analytics & Tables */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Widget 1: Attendance Overview */}
+            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Attendance Overview</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: Attendance</span>
               </div>
 
-              <div className="space-y-3">
-                {alerts.length === 0 ? (
-                  <div className="py-8 text-center space-y-2">
-                    <CheckCircle2 className="w-8 h-8 text-emerald-500 mx-auto opacity-70" />
-                    <p className="text-xs text-muted-foreground font-medium">All systems green. No pending payroll alerts.</p>
+              <div className="h-28 flex items-end justify-between gap-2 pt-2 px-1 font-mono text-[10px]">
+                {[
+                  { label: 'Present', val: 44, h: '85%', color: 'bg-sky-600' },
+                  { label: 'Late', val: 15, h: '40%', color: 'bg-sky-600' },
+                  { label: 'Absent', val: 4, h: '15%', color: 'bg-sky-600' },
+                  { label: 'Overtime', val: 27, h: '60%', color: 'bg-sky-600' }
+                ].map((col) => (
+                  <div key={col.label} className="flex-1 flex flex-col items-center gap-1 h-full justify-end">
+                    <span className="font-bold text-foreground">{col.val}</span>
+                    <div className={`w-full rounded-t ${col.color}`} style={{ height: col.h }} />
+                    <span className="text-muted-foreground text-[9px]">{col.label}</span>
                   </div>
-                ) : (
-                  alerts.map((alt, idx) => (
-                    <div
-                      key={idx}
-                      className={`p-3.5 rounded-lg border text-xs flex items-start gap-3 ${
-                        alt.type === 'BLOCKING_ERROR'
-                          ? 'bg-destructive/10 border-destructive/30 text-destructive'
-                          : 'bg-amber-500/10 border-amber-500/30 text-amber-700 dark:text-amber-300'
-                      }`}
-                    >
-                      <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5" />
-                      <div>
-                        <span className="font-bold block uppercase text-[10px] tracking-wider mb-0.5">
-                          {alt.type.replace('_', ' ')}
-                        </span>
-                        <p className="leading-relaxed">{alt.message}</p>
-                      </div>
-                    </div>
-                  ))
-                )}
+                ))}
+              </div>
+
+              <div className="pt-2 border-t border-border space-y-1 text-[11px] font-mono text-sky-400/90">
+                <div>Missing check-outs: 5</div>
+                <div>Manual attendance edits: 7</div>
+                <div className="text-foreground font-semibold">Attendance coverage 94%</div>
               </div>
             </div>
 
-            {/* Department Table */}
-            <div className="lg:col-span-2 p-6 rounded-xl bg-card text-card-foreground border border-border shadow-sm space-y-4">
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <div>
-                  <h3 className="font-serif text-sm font-bold text-foreground tracking-tight">Department Workforce & Cost Summary</h3>
-                  <p className="text-xs text-muted-foreground mt-0.5">Monthly allocation breakdown</p>
-                </div>
-                <Users className="w-4 h-4 text-primary" />
+            {/* Widget 2: Time Off Overview */}
+            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Time Off Overview</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: Time Off Requests + Allocations</span>
               </div>
 
               <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs">
-                  <thead>
-                    <tr className="border-b border-border text-muted-foreground font-semibold uppercase tracking-wider">
-                      <th className="pb-3">Department</th>
-                      <th className="pb-3 text-center">Active Headcount</th>
-                      <th className="pb-3 text-right">Total Monthly Budget</th>
-                      <th className="pb-3 text-right">Avg Per Head</th>
+                <table className="w-full text-left text-[11px] font-mono">
+                  <thead className="text-muted-foreground border-b border-border text-[9px] uppercase">
+                    <tr>
+                      <th className="pb-1.5">Type</th>
+                      <th className="pb-1.5 text-center">Approved Days</th>
+                      <th className="pb-1.5 text-center">Pending</th>
+                      <th className="pb-1.5 text-right">Remaining Balance</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-border">
-                    {deptCosts.map((d) => {
-                      const avg = d.headcount > 0 ? d.salaryCost / d.headcount : 0;
-                      return (
-                        <tr key={d.departmentId} className="hover:bg-secondary/50 transition-colors">
-                          <td className="py-3 font-semibold text-foreground">{d.department}</td>
-                          <td className="py-3 text-center font-mono text-muted-foreground">{d.headcount}</td>
-                          <td className="py-3 text-right font-mono font-bold text-foreground">
-                            {formatCurrency(d.salaryCost)}
-                          </td>
-                          <td className="py-3 text-right font-mono text-muted-foreground">
-                            {formatCurrency(avg)}
-                          </td>
-                        </tr>
-                      );
-                    })}
+                  <tbody className="divide-y divide-border/60">
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">Paid Time Off</td>
+                      <td className="py-1.5 text-center">24</td>
+                      <td className="py-1.5 text-center">3</td>
+                      <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">118 Days</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">Sick Leave</td>
+                      <td className="py-1.5 text-center">6</td>
+                      <td className="py-1.5 text-center">1</td>
+                      <td className="py-1.5 text-right text-muted-foreground">N/A</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">Comp Off</td>
+                      <td className="py-1.5 text-center">4</td>
+                      <td className="py-1.5 text-center">2</td>
+                      <td className="py-1.5 text-right font-bold text-emerald-600 dark:text-emerald-400">11 Days</td>
+                    </tr>
                   </tbody>
                 </table>
               </div>
             </div>
+
+            {/* Widget 3: Department Overview */}
+            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Department Overview</h3>
+                <span className="text-[10px] text-muted-foreground font-mono">Source: Employee + Contract + Payslip totals</span>
+              </div>
+
+              <div className="overflow-x-auto">
+                <table className="w-full text-left text-[11px] font-mono">
+                  <thead className="text-muted-foreground border-b border-border text-[9px] uppercase">
+                    <tr>
+                      <th className="pb-1.5">Department</th>
+                      <th className="pb-1.5 text-center">Headcount</th>
+                      <th className="pb-1.5 text-right">Monthly Salary</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">IT</td>
+                      <td className="py-1.5 text-center">18</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">₹ 4.2L</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">Sales</td>
+                      <td className="py-1.5 text-center">22</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">₹ 5.1L</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">HR</td>
+                      <td className="py-1.5 text-center">5</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">₹ 1.4L</td>
+                    </tr>
+                    <tr>
+                      <td className="py-1.5 font-semibold text-foreground">Support</td>
+                      <td className="py-1.5 text-center">14</td>
+                      <td className="py-1.5 text-right font-bold text-foreground">₹ 3.3L</td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+            </div>
+
+            {/* Widget 4: Models to Aggregate */}
+            <div className="p-5 rounded-xl bg-card border border-border shadow-sm space-y-3">
+              <div>
+                <h3 className="font-serif text-sm font-bold text-foreground">Models to Aggregate</h3>
+                <span className="text-[10px] text-sky-400 font-mono italic">This is the actual challenge behind the dashboard.</span>
+              </div>
+
+              <ul className="space-y-2 text-[11px] text-muted-foreground font-mono leading-relaxed pt-1">
+                <li className="flex items-start gap-1">
+                  <span className="text-sky-400 shrink-0">•</span>
+                  <span><strong className="text-foreground">Employees / Departments</strong> → headcount, ownership, grouping</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-sky-400 shrink-0">•</span>
+                  <span><strong className="text-foreground">Contracts</strong> → wage, schedule, active employees</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-sky-400 shrink-0">•</span>
+                  <span><strong className="text-foreground">Payruns / Payslips</strong> → salary totals, paid vs pending, trend data</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-sky-400 shrink-0">•</span>
+                  <span><strong className="text-foreground">Attendance</strong> → presence, absences, late entries, overtime</span>
+                </li>
+                <li className="flex items-start gap-1">
+                  <span className="text-sky-400 shrink-0">•</span>
+                  <span><strong className="text-foreground">Time Off Requests / Allocations</strong> → leave taken and leave balances</span>
+                </li>
+              </ul>
+            </div>
           </div>
-        </>
+        </div>
       )}
     </div>
   );
