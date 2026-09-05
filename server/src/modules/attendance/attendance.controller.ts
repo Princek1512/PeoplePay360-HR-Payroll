@@ -22,10 +22,14 @@ export const listAttendance = async (req: Request, res: Response, next: NextFunc
       where.status = String(status);
     }
 
-    if (startDate || endDate) {
-      where.checkIn = {};
-      if (startDate) where.checkIn.gte = new Date(String(startDate));
-      if (endDate) where.checkIn.lte = new Date(String(endDate));
+    const now = new Date();
+    where.checkIn = {};
+    if (startDate) where.checkIn.gte = new Date(String(startDate));
+    if (endDate) {
+      const requestedEnd = new Date(String(endDate));
+      where.checkIn.lte = requestedEnd > now ? now : requestedEnd;
+    } else {
+      where.checkIn.lte = now;
     }
 
     const records = await prisma.attendance.findMany({
@@ -238,6 +242,14 @@ export const correctAttendance = async (req: Request, res: Response, next: NextF
 
     const inDate = checkIn ? new Date(checkIn) : undefined;
     const outDate = checkOut ? new Date(checkOut) : undefined;
+    const now = new Date();
+
+    if (inDate && inDate > now) {
+      return res.status(400).json({ success: false, message: 'Attendance check-in date cannot be in the future.' });
+    }
+    if (outDate && outDate > now) {
+      return res.status(400).json({ success: false, message: 'Attendance check-out date cannot be in the future.' });
+    }
 
     let workedHours: number | undefined;
     if (inDate && outDate) {

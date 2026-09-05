@@ -2,7 +2,18 @@ import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/apiClient';
 import { ScheduleModal } from './ScheduleModal';
 import { useAuth } from '../../context/AuthContext';
-import { CalendarDays, Plus, Edit2 } from 'lucide-react';
+import { CalendarDays, Plus, Edit2, Trash2 } from 'lucide-react';
+
+const DAY_NAMES = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+
+function formatWorkingDays(lines?: any[]) {
+  if (!lines || lines.length === 0) return 'Mon-Fri';
+  const dayNums = lines.map((l: any) => l.dayOfWeek).sort((a: number, b: number) => a - b);
+  if (dayNums.length === 5 && dayNums.every((d: number, idx: number) => d === idx + 1)) {
+    return 'Mon-Fri';
+  }
+  return dayNums.map((d: number) => DAY_NAMES[d]).join(', ');
+}
 
 export const ScheduleListPage: React.FC = () => {
   const { can } = useAuth();
@@ -37,6 +48,18 @@ export const ScheduleListPage: React.FC = () => {
     setIsModalOpen(true);
   };
 
+  const handleDelete = async (schedule: any) => {
+    if (!window.confirm(`Are you sure you want to delete the schedule "${schedule.name}"?`)) {
+      return;
+    }
+    try {
+      await apiClient.delete(`/schedules/${schedule.id}`);
+      fetchSchedules();
+    } catch (err: any) {
+      alert(err.response?.data?.message || 'Failed to delete schedule.');
+    }
+  };
+
   return (
     <div className="space-y-6 font-sans">
       {/* Header */}
@@ -47,7 +70,7 @@ export const ScheduleListPage: React.FC = () => {
             <h1 className="font-serif text-2xl font-bold text-foreground tracking-tight">Working Schedules</h1>
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            Weekly working calendars. Weekly hours are derived strictly from shift lines (never typed by hand).
+            Weekly working calendars. Weekly hours are automatically calculated and customizable per shift line.
           </p>
         </div>
 
@@ -71,7 +94,7 @@ export const ScheduleListPage: React.FC = () => {
                 <th className="px-6 py-3.5">Schedule Name</th>
                 <th className="px-6 py-3.5">Type</th>
                 <th className="px-6 py-3.5">Working Days</th>
-                <th className="px-6 py-3.5">Derived Weekly Hours</th>
+                <th className="px-6 py-3.5">Weekly Hours</th>
                 <th className="px-6 py-3.5">Assigned Employees</th>
                 <th className="px-6 py-3.5">Status</th>
                 <th className="px-6 py-3.5 text-right">Actions</th>
@@ -91,31 +114,35 @@ export const ScheduleListPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                schedules.map((s) => (
-                  <tr key={s.id} className="hover:bg-secondary/60 transition-colors">
-                    <td className="px-6 py-4 font-bold text-foreground">
-                      {s.name}
-                    </td>
-                    <td className="px-6 py-4 capitalize text-foreground">
-                      {s.type}
-                    </td>
-                    <td className="px-6 py-4 text-muted-foreground">
-                      {s.workingDays?.join(', ') || 'Mon-Fri'}
-                    </td>
-                    <td className="px-6 py-4 font-mono font-bold text-foreground">
-                      {Number(s.totalWeeklyHours).toFixed(1)} hrs/wk
-                    </td>
-                    <td className="px-6 py-4 font-mono text-muted-foreground">
-                      {s.employeesCount || 0} staff
-                    </td>
-                    <td className="px-6 py-4">
-                      <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
-                        s.isActive ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-300' : 'bg-secondary text-muted-foreground'
-                      }`}>
-                        {s.isActive ? 'Active' : 'Archived'}
-                      </span>
-                    </td>
-                    <td className="px-6 py-4 text-right">
+                schedules.map((s) => {
+                  const isActive = s.status === 'active' || s.isActive;
+                  const calendarTypeLabel = (s.calendarType || s.type || 'standard').replace('_', ' ');
+
+                  return (
+                    <tr key={s.id} className="hover:bg-secondary/60 transition-colors">
+                      <td className="px-6 py-4 font-bold text-foreground">
+                        {s.name}
+                      </td>
+                      <td className="px-6 py-4 capitalize text-foreground">
+                        {calendarTypeLabel}
+                      </td>
+                      <td className="px-6 py-4 text-muted-foreground">
+                        {formatWorkingDays(s.lines)}
+                      </td>
+                      <td className="px-6 py-4 font-mono font-bold text-foreground">
+                        {Number(s.totalWeeklyHours).toFixed(1)} hrs/wk
+                      </td>
+                      <td className="px-6 py-4 font-mono text-muted-foreground font-semibold">
+                        {s.employeesCount ?? 0} staff
+                      </td>
+                      <td className="px-6 py-4">
+                        <span className={`px-2.5 py-0.5 rounded-full text-[10px] font-semibold ${
+                          isActive ? 'bg-emerald-100 dark:bg-emerald-950/50 text-emerald-900 dark:text-emerald-300' : 'bg-secondary text-muted-foreground'
+                        }`}>
+                          {isActive ? 'Active' : 'Archived'}
+                        </span>
+                      </td>
+                    <td className="px-6 py-4 text-right flex items-center justify-end gap-1.5">
                       {can('schedules', 'update') && (
                         <button
                           onClick={() => handleEdit(s)}
@@ -125,9 +152,19 @@ export const ScheduleListPage: React.FC = () => {
                           <Edit2 className="w-3.5 h-3.5" />
                         </button>
                       )}
+                      {can('schedules', 'delete') && (
+                        <button
+                          onClick={() => handleDelete(s)}
+                          className="p-1.5 rounded-md text-muted-foreground hover:text-rose-600 hover:bg-rose-500/10 transition-colors"
+                          title="Delete Schedule"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      )}
                     </td>
                   </tr>
-                ))
+                );
+              })
               )}
             </tbody>
           </table>

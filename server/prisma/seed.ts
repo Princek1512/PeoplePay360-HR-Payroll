@@ -425,25 +425,28 @@ async function main() {
     });
   }
 
-  // 11. Sample Time Off Request
+  // 11. Sample Time Off Request (Past dates)
   await prisma.timeOffRequest.create({
     data: {
       employeeId: empEngineer.id,
       timeOffTypeId: typePaidLeave.id,
-      startDate: new Date(now.getFullYear(), now.getMonth(), 5),
-      endDate: new Date(now.getFullYear(), now.getMonth(), 6),
+      startDate: new Date(now.getFullYear(), now.getMonth(), 2),
+      endDate: new Date(now.getFullYear(), now.getMonth(), 3),
       durationAmount: 2.0,
       status: 'approved',
       reason: 'Attending annual tech conference'
     }
   });
 
-  // 12. Attendance records for current month
+  // 12. Attendance records for current month (Capped at past days; no future data)
   const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
   const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
 
-  // Seed 16 days of regular daytime shift attendance for empEngineer (David Chen) (120 hrs core shift)
-  for (let day = 1; day <= 16; day++) {
+  // Maximum past day to seed (e.g., up to yesterday or current date - 1)
+  const pastDaysCount = Math.max(1, Math.min(now.getDate() - 1, 5));
+
+  // Seed regular daytime shift attendance for empEngineer (David Chen)
+  for (let day = 1; day <= pastDaysCount; day++) {
     const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
     const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 16, 30, 0); // 7.5h shift
     await prisma.attendance.create({
@@ -457,34 +460,38 @@ async function main() {
     });
   }
 
-  // David Chen Overtime Entry 1: Sep 19, 7:00 PM to 11:30 PM (4.5 hrs out-of-range overtime)
-  const dcOt1Start = new Date(now.getFullYear(), 8, 19, 19, 0, 0);
-  const dcOt1End = new Date(now.getFullYear(), 8, 19, 23, 30, 0);
-  await prisma.attendance.create({
-    data: {
-      employeeId: empEngineer.id,
-      checkIn: dcOt1Start,
-      checkOut: dcOt1End,
-      workedHours: 4.5,
-      status: 'normal'
-    }
-  });
+  // David Chen Past Overtime Entry 1: Sep 3, 7:00 PM to 11:30 PM (4.5 hrs out-of-range overtime)
+  if (now.getDate() >= 4) {
+    const dcOt1Start = new Date(now.getFullYear(), now.getMonth(), 3, 19, 0, 0);
+    const dcOt1End = new Date(now.getFullYear(), now.getMonth(), 3, 23, 30, 0);
+    await prisma.attendance.create({
+      data: {
+        employeeId: empEngineer.id,
+        checkIn: dcOt1Start,
+        checkOut: dcOt1End,
+        workedHours: 4.5,
+        status: 'normal'
+      }
+    });
+  }
 
-  // David Chen Overtime Entry 2: Sep 20, 7:30 PM to Sep 21, 9:00 AM (13.5 hrs out-of-range overnight overtime)
-  const dcOt2Start = new Date(now.getFullYear(), 8, 20, 19, 30, 0);
-  const dcOt2End = new Date(now.getFullYear(), 8, 21, 9, 0, 0);
-  await prisma.attendance.create({
-    data: {
-      employeeId: empEngineer.id,
-      checkIn: dcOt2Start,
-      checkOut: dcOt2End,
-      workedHours: 13.5,
-      status: 'normal'
-    }
-  });
+  // David Chen Past Overtime Entry 2: Sep 4, 7:30 PM to Sep 5, 9:00 AM (13.5 hrs out-of-range overnight overtime)
+  if (now.getDate() >= 5) {
+    const dcOt2Start = new Date(now.getFullYear(), now.getMonth(), 4, 19, 30, 0);
+    const dcOt2End = new Date(now.getFullYear(), now.getMonth(), 5, 9, 0, 0);
+    await prisma.attendance.create({
+      data: {
+        employeeId: empEngineer.id,
+        checkIn: dcOt2Start,
+        checkOut: dcOt2End,
+        workedHours: 13.5,
+        status: 'normal'
+      }
+    });
+  }
 
-  // Seed 20 days of attendance for empPayrollManager (Exact shift scenario: 8 hours per day = 160 hrs total)
-  for (let day = 1; day <= 20; day++) {
+  // Seed past attendance for empPayrollManager (8 hours per day)
+  for (let day = 1; day <= pastDaysCount; day++) {
     const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
     const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift
     await prisma.attendance.create({
@@ -498,10 +505,10 @@ async function main() {
     });
   }
 
-  // Seed 15 days of attendance for empHrManager (Under-time scenario: 120 hrs total vs 160h target)
-  for (let day = 1; day <= 15; day++) {
+  // Seed past attendance for empHrManager
+  for (let day = 1; day <= pastDaysCount; day++) {
     const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
-    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift for 15 days = 120h
+    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift
     await prisma.attendance.create({
       data: {
         employeeId: empHrManager.id,

@@ -151,7 +151,7 @@ export const ContractModal: React.FC<ContractModalProps> = ({
         <div className="grid grid-cols-2 gap-4">
           <div>
             <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
-              Monthly Wage ($)
+              Monthly Wage (₹)
             </label>
             <input
               type="number"

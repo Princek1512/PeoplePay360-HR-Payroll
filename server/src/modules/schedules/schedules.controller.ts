@@ -25,12 +25,30 @@ export const listSchedules = async (req: Request, res: Response, next: NextFunct
     const schedules = await prisma.workingSchedule.findMany({
       include: {
         lines: { orderBy: { dayOfWeek: 'asc' } },
-        _count: { select: { employees: true, contracts: true } }
+        employees: { select: { id: true } },
+        contracts: {
+          where: { status: 'running' },
+          select: { employeeId: true }
+        }
       },
       orderBy: { name: 'asc' }
     });
 
-    return res.json({ success: true, data: schedules });
+    const data = schedules.map((s) => {
+      const empSet = new Set<string>();
+      s.employees?.forEach((e) => empSet.add(e.id));
+      s.contracts?.forEach((c) => {
+        if (c.employeeId) empSet.add(c.employeeId);
+      });
+
+      return {
+        ...s,
+        employeesCount: empSet.size,
+        totalWeeklyHours: Number(s.totalWeeklyHours)
+      };
+    });
+
+    return res.json({ success: true, data });
   } catch (err) {
     next(err);
   }

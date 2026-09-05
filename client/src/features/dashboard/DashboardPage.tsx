@@ -8,7 +8,7 @@ import { useAuth } from '../../context/AuthContext';
 import { useAttendance } from '../../context/AttendanceContext';
 import {
   LayoutDashboard,
-  DollarSign,
+  IndianRupee,
   ReceiptText,
   Users,
   PlaneTakeoff,
@@ -316,11 +316,11 @@ export const DashboardPage: React.FC = () => {
                 <span className="text-xs font-semibold text-muted-foreground uppercase tracking-wider">
                   Base Compensation
                 </span>
-                <DollarSign className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
+                <IndianRupee className="w-4 h-4 text-emerald-600 dark:text-emerald-400" />
               </div>
               <div>
-                <span className="font-serif text-lg font-bold text-foreground font-mono">
-                  {activeWage ? formatCurrency(activeWage) : '$0.00'}
+                <span className="text-lg font-bold text-foreground font-sans">
+                  {activeWage ? formatCurrency(activeWage) : '₹0.00'}
                 </span>
                 <p className="text-[11px] text-muted-foreground mt-1">
                   {activeContract ? 'Monthly contract wage' : 'No active contract'}
@@ -701,7 +701,7 @@ export const DashboardPage: React.FC = () => {
                 Total Net Salary Paid
               </span>
               <span className="text-2xl font-bold text-foreground block">
-                $18.4L
+                ₹18.4L
               </span>
               <span className="inline-block px-2 py-0.5 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 text-[10px] font-bold font-mono">
                 +8.5% vs previous month
@@ -727,7 +727,7 @@ export const DashboardPage: React.FC = () => {
                 Avg Salary / Employee
               </span>
               <span className="text-2xl font-bold text-foreground font-mono block">
-                $12,432
+                ₹12,432
               </span>
               <span className="text-[10px] text-emerald-600 dark:text-emerald-400 block font-mono">
                 Based on current payrun
@@ -775,7 +775,7 @@ export const DashboardPage: React.FC = () => {
                   ? deptCosts.map((bar) => {
                       const costVal = Number(bar.salaryCost || 0);
                       const heightPct = maxDeptCost > 0 ? Math.max(20, Math.round((costVal / maxDeptCost) * 100)) : 20;
-                      const formattedVal = costVal >= 1000 ? `$${(costVal / 1000).toFixed(0)}k` : `$${costVal}`;
+                      const formattedVal = costVal >= 1000 ? `₹${(costVal / 1000).toFixed(0)}k` : `₹${costVal}`;
                       return (
                         <div key={bar.departmentId || bar.department} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
                           <span className="text-[10px] font-bold text-sky-400">{formattedVal}</span>
@@ -788,11 +788,11 @@ export const DashboardPage: React.FC = () => {
                       );
                     })
                   : [
-                      { dept: 'HR', val: '$110k', height: '65%' },
-                      { dept: 'Sales', val: '$150k', height: '85%' },
-                      { dept: 'Support', val: '$90k', height: '50%' },
-                      { dept: 'Finance', val: '$120k', height: '70%' },
-                      { dept: 'IT', val: '$170k', height: '95%' }
+                      { dept: 'HR', val: '₹110k', height: '65%' },
+                      { dept: 'Sales', val: '₹150k', height: '85%' },
+                      { dept: 'Support', val: '₹90k', height: '50%' },
+                      { dept: 'Finance', val: '₹120k', height: '70%' },
+                      { dept: 'IT', val: '₹170k', height: '95%' }
                     ].map((bar) => (
                       <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
                         <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
@@ -859,7 +859,7 @@ export const DashboardPage: React.FC = () => {
                           <g transform={`translate(${Math.max(10, Math.min(245, peakPoint.x - 22))}, ${Math.max(0, peakPoint.y - 20)})`}>
                             <rect x="0" y="0" width="44" height="16" rx="4" className="fill-card stroke-sky-500" strokeWidth="1" />
                             <text x="22" y="11" textAnchor="middle" className="text-[9px] font-bold fill-sky-400 font-mono">
-                              {peakPoint.val >= 100000 ? `$${(peakPoint.val / 100000).toFixed(1)}L` : `$${Math.round(peakPoint.val / 1000)}k`}
+                              {peakPoint.val >= 100000 ? `₹${(peakPoint.val / 100000).toFixed(1)}L` : `₹${Math.round(peakPoint.val / 1000)}k`}
                             </text>
                           </g>
                         )}
@@ -1074,22 +1074,22 @@ export const DashboardPage: React.FC = () => {
                         <tr>
                           <td className="py-1.5 font-semibold text-foreground">IT</td>
                           <td className="py-1.5 text-center">18</td>
-                          <td className="py-1.5 text-right font-bold text-foreground">$4.2L</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">₹4.2L</td>
                         </tr>
                         <tr>
                           <td className="py-1.5 font-semibold text-foreground">Sales</td>
                           <td className="py-1.5 text-center">22</td>
-                          <td className="py-1.5 text-right font-bold text-foreground">$5.1L</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">₹5.1L</td>
                         </tr>
                         <tr>
                           <td className="py-1.5 font-semibold text-foreground">HR</td>
                           <td className="py-1.5 text-center">5</td>
-                          <td className="py-1.5 text-right font-bold text-foreground">$1.4L</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">₹1.4L</td>
                         </tr>
                         <tr>
                           <td className="py-1.5 font-semibold text-foreground">Support</td>
                           <td className="py-1.5 text-center">14</td>
-                          <td className="py-1.5 text-right font-bold text-foreground">$3.3L</td>
+                          <td className="py-1.5 text-right font-bold text-foreground">₹3.3L</td>
                         </tr>
                       </>
                     )}

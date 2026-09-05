@@ -44,7 +44,7 @@ export class PayslipRenderService {
             <td><strong>${line.code}</strong></td>
             <td>${line.label}</td>
             <td><span class="tag ${catClass}">${line.category}</span></td>
-            <td class="num">$${Number(line.amount).toLocaleString('en-US', { minimumFractionDigits: 2 })}</td>
+            <td class="num">₹${Number(line.amount).toLocaleString('en-IN', { minimumFractionDigits: 2 })}</td>
           </tr>
         `;
       })
@@ -68,9 +68,9 @@ export class PayslipRenderService {
       .replace(/{{periodEnd}}/g, new Date(payslip.periodEnd).toLocaleDateString())
       .replace(/{{payslipId}}/g, payslip.id)
       .replace(/{{tableRows}}/g, rowsHtml)
-      .replace(/{{grossSalary}}/g, Number(payslip.grossSalary).toLocaleString('en-US', { minimumFractionDigits: 2 }))
-      .replace(/{{totalDeductions}}/g, totalDeductions.toLocaleString('en-US', { minimumFractionDigits: 2 }))
-      .replace(/{{netSalary}}/g, Number(payslip.netSalary).toLocaleString('en-US', { minimumFractionDigits: 2 }))
+      .replace(/{{grossSalary}}/g, Number(payslip.grossSalary).toLocaleString('en-IN', { minimumFractionDigits: 2 }))
+      .replace(/{{totalDeductions}}/g, totalDeductions.toLocaleString('en-IN', { minimumFractionDigits: 2 }))
+      .replace(/{{netSalary}}/g, Number(payslip.netSalary).toLocaleString('en-IN', { minimumFractionDigits: 2 }))
       .replace(/{{generatedAt}}/g, new Date().toLocaleString());
 
     return html;
