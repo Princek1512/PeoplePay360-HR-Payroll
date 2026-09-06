@@ -178,9 +178,10 @@ export const RuleModal: React.FC<RuleModalProps> = ({
         {computationMethod === 'fixed' && (
           <div>
             <label className="block text-xs font-semibold text-muted-foreground mb-1 uppercase tracking-wider">
-              Fixed Amount ($)
+              Fixed Amount (₹)
             </label>
             <input
+
               type="number"
               step="0.01"
               value={amount}
