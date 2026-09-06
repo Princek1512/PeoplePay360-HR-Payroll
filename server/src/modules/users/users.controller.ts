@@ -195,3 +195,28 @@ export const updateUserRoles = async (req: Request, res: Response, next: NextFun
     next(err);
   }
 };
+
+export const deleteUser = async (req: Request, res: Response, next: NextFunction) => {
+  try {
+    const { id } = req.params;
+
+    if (req.user?.id === id) {
+      return res.status(400).json({ success: false, message: 'You cannot delete your own active user account.' });
+    }
+
+    const user = await prisma.user.findUnique({ where: { id } });
+    if (!user) {
+      return res.status(404).json({ success: false, message: 'User account not found.' });
+    }
+
+    await prisma.$transaction([
+      prisma.userRole.deleteMany({ where: { userId: id } }),
+      prisma.user.delete({ where: { id } })
+    ]);
+
+    return res.json({ success: true, message: 'User account deleted successfully.' });
+  } catch (err) {
+    next(err);
+  }
+};
+

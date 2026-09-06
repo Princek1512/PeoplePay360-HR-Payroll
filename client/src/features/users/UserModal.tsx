@@ -197,23 +197,50 @@ export const UserModal: React.FC<UserModalProps> = ({
           </label>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-          <button
-            type="button"
-            onClick={onClose}
-            className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
-          >
-            Cancel
-          </button>
-          <button
-            type="submit"
-            disabled={loading}
-            className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
-          >
-            {loading ? 'Saving...' : userToEdit ? 'Update Roles' : 'Create User'}
-          </button>
+        <div className="flex items-center justify-between pt-4 border-t border-border">
+          {userToEdit ? (
+            <button
+              type="button"
+              onClick={async () => {
+                if (!window.confirm(`Permanently delete user account '${userToEdit.email}'?`)) return;
+                try {
+                  setLoading(true);
+                  await apiClient.delete(`/users/${userToEdit.id}`);
+                  onSuccess();
+                  onClose();
+                } catch (err: any) {
+                  setError(err.response?.data?.message || 'Failed to delete user account.');
+                } finally {
+                  setLoading(false);
+                }
+              }}
+              className="px-3.5 py-2 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs font-medium border border-rose-500/30 transition-all"
+            >
+              Delete Account
+            </button>
+          ) : (
+            <div />
+          )}
+
+          <div className="flex items-center gap-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 rounded-md text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-secondary transition-colors"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              disabled={loading}
+              className="px-5 py-2 rounded-md bg-primary hover:bg-primary/90 text-primary-foreground text-xs font-medium shadow-sm transition-all disabled:opacity-50"
+            >
+              {loading ? 'Saving...' : userToEdit ? 'Update Roles' : 'Create User'}
+            </button>
+          </div>
         </div>
       </form>
     </Modal>
   );
+
 };

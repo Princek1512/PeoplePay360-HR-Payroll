@@ -1,16 +1,19 @@
 import React, { useState, useEffect } from 'react';
 import { apiClient } from '../../lib/apiClient';
+import { useAuth } from '../../context/AuthContext';
 import { StatusBadge } from '../../components/shared/StatusBadge';
 import { formatDate } from '../../lib/formatters';
 import { UserModal } from './UserModal';
-import { Shield, Plus, Search, Edit2 } from 'lucide-react';
+import { Shield, Plus, Search, Edit2, Trash2 } from 'lucide-react';
 
 export const UserManagementPage: React.FC = () => {
+  const { user: currentUser } = useAuth();
   const [users, setUsers] = useState<any[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState('');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingUser, setEditingUser] = useState<any | null>(null);
+  const [deletingId, setDeletingId] = useState<string | null>(null);
 
   const fetchUsers = async () => {
     try {
@@ -36,6 +39,28 @@ export const UserManagementPage: React.FC = () => {
   const handleEdit = (user: any) => {
     setEditingUser(user);
     setIsModalOpen(true);
+  };
+
+  const handleDelete = async (u: any) => {
+    if (u.id === currentUser?.id) {
+      alert('You cannot delete your own active user account.');
+      return;
+    }
+
+    if (!window.confirm(`Are you sure you want to permanently delete user account '${u.email}'?`)) {
+      return;
+    }
+
+    try {
+      setDeletingId(u.id);
+      await apiClient.delete(`/users/${u.id}`);
+      await fetchUsers();
+    } catch (err: any) {
+      console.error(err);
+      alert(err.response?.data?.message || 'Failed to delete user account.');
+    } finally {
+      setDeletingId(null);
+    }
   };
 
   const filtered = users.filter((u) =>
@@ -108,7 +133,7 @@ export const UserManagementPage: React.FC = () => {
                   </td>
                 </tr>
               ) : (
-                users.map((u) => (
+                filtered.map((u) => (
                   <tr key={u.id} className="hover:bg-secondary/60 transition-colors">
                     <td className="px-6 py-4 font-mono font-medium text-foreground">
                       {u.email}
@@ -142,13 +167,25 @@ export const UserManagementPage: React.FC = () => {
                       {formatDate(u.createdAt)}
                     </td>
                     <td className="px-6 py-4 text-right">
-                      <button
-                        onClick={() => handleEdit(u)}
-                        className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs transition-colors border border-border"
-                      >
-                        <Edit2 className="w-3.5 h-3.5" />
-                        <span>Edit Roles</span>
-                      </button>
+                      <div className="flex items-center justify-end gap-2">
+                        <button
+                          onClick={() => handleEdit(u)}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-secondary hover:bg-secondary/80 text-foreground text-xs transition-colors border border-border"
+                        >
+                          <Edit2 className="w-3.5 h-3.5" />
+                          <span>Edit Roles</span>
+                        </button>
+
+                        <button
+                          onClick={() => handleDelete(u)}
+                          disabled={deletingId === u.id || u.id === currentUser?.id}
+                          className="inline-flex items-center gap-1 px-2.5 py-1 rounded-md bg-rose-500/10 hover:bg-rose-500/20 text-rose-600 dark:text-rose-400 text-xs transition-colors border border-rose-500/30 disabled:opacity-40"
+                          title={u.id === currentUser?.id ? 'Cannot delete current logged-in user' : 'Delete user account'}
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                          <span>Delete</span>
+                        </button>
+                      </div>
                     </td>
                   </tr>
                 ))
@@ -167,3 +204,4 @@ export const UserManagementPage: React.FC = () => {
     </div>
   );
 };
+
