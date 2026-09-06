@@ -114,10 +114,11 @@ export const RuleListPage: React.FC = () => {
                         {r.computationMethod}
                       </td>
                       <td className="px-6 py-4 font-mono text-xs text-foreground">
-                        {r.computationMethod === 'fixed' && `$${Number(r.amount).toLocaleString()}`}
+                        {r.computationMethod === 'fixed' && `₹${Number(r.amount).toLocaleString()}`}
                         {r.computationMethod === 'percentage' && `${r.percentageOf}%`}
                         {r.computationMethod === 'formula' && <span className="text-primary font-semibold">{r.formula}</span>}
                       </td>
+
                       <td className="px-6 py-4 text-right">
                         {can('salaryRules', 'update') && (
                           <button
