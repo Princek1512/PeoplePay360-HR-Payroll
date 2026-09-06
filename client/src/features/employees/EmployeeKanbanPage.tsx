@@ -49,14 +49,14 @@ export const EmployeeKanbanPage: React.FC = () => {
   }, [selectedDept, search]);
 
   // Group employees by department for Kanban view
-  const departmentGroups = departments.map((dept) => ({
+  const rawDepartmentGroups = departments.map((dept) => ({
     ...dept,
     employees: employees.filter((e) => e.departmentId === dept.id)
   }));
 
   const unassignedEmployees = employees.filter((e) => !e.departmentId);
   if (unassignedEmployees.length > 0) {
-    departmentGroups.push({
+    rawDepartmentGroups.push({
       id: 'unassigned',
       name: 'General / Unassigned',
       managerName: 'N/A',
@@ -64,6 +64,17 @@ export const EmployeeKanbanPage: React.FC = () => {
       employees: unassignedEmployees
     });
   }
+
+  // Filter columns so that when a department or search filter is applied, only matching department columns are shown
+  const visibleGroups = rawDepartmentGroups.filter((group) => {
+    if (selectedDept) {
+      return group.id === selectedDept;
+    }
+    if (search.trim()) {
+      return group.employees.length > 0;
+    }
+    return true;
+  });
 
   return (
     <div className="space-y-6 font-sans">
@@ -150,71 +161,84 @@ export const EmployeeKanbanPage: React.FC = () => {
 
       {/* Kanban View */}
       {viewMode === 'kanban' ? (
-        <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 items-start">
-          {departmentGroups.map((group) => (
-            <div
-              key={group.id}
-              className="rounded-xl bg-card border border-border p-4 space-y-4 shadow-sm"
-            >
-              <div className="flex items-center justify-between pb-3 border-b border-border">
-                <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-primary" />
-                  <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-foreground">
-                    {group.name}
-                  </h3>
-                </div>
-                <span className="px-2 py-0.5 rounded-full bg-secondary border border-border text-[10px] font-mono text-muted-foreground">
-                  {group.employees.length}
-                </span>
-              </div>
-
-              <div className="space-y-3 min-h-[150px]">
-                {group.employees.length === 0 ? (
-                  <div className="p-6 text-center text-xs text-muted-foreground italic border border-dashed border-border rounded-lg">
-                    No members in this department
+        visibleGroups.length === 0 ? (
+          <div className="p-12 text-center text-muted-foreground border border-dashed border-border rounded-xl bg-card">
+            <Users className="w-8 h-8 mx-auto mb-2 opacity-50" />
+            <p className="text-sm font-medium">No department members found matching the selected filter</p>
+          </div>
+        ) : (
+          <div className={`flex gap-5 overflow-x-auto pb-6 items-start scrollbar-thin ${selectedDept ? 'justify-start' : ''}`}>
+            {visibleGroups.map((group) => (
+              <div
+                key={group.id}
+                className={`rounded-xl bg-card border border-border p-4 space-y-4 shadow-sm shrink-0 ${
+                  selectedDept ? 'w-full max-w-xl' : 'flex-1 min-w-[280px] max-w-[380px]'
+                }`}
+              >
+                <div className="flex items-center justify-between pb-3 border-b border-border">
+                  <div className="flex items-center gap-2">
+                    <span className="w-2 h-2 rounded-full bg-primary" />
+                    <h3 className="font-serif text-xs font-bold uppercase tracking-wider text-foreground">
+                      {group.name}
+                    </h3>
                   </div>
-                ) : (
-                  group.employees.map((emp: any) => (
-                    <div
-                      key={emp.id}
-                      onClick={() => navigate(`/employees/${emp.id}`)}
-                      className="group p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:translate-y-[-2px]"
-                    >
-                      <div className="flex items-start justify-between gap-3">
-                        <div className="flex items-center gap-3">
-                          <img
-                            src={emp.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emp.name)}`}
-                            alt={emp.name}
-                            className="w-10 h-10 rounded-lg border border-border object-cover shadow-sm"
-                          />
-                          <div>
-                            <h4 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
-                              {emp.name}
-                            </h4>
-                            <p className="text-[11px] text-muted-foreground">
-                              {emp.jobPosition?.title || 'Staff'}
-                            </p>
-                          </div>
-                        </div>
-                        <StatusBadge status={emp.status} size="sm" />
-                      </div>
+                  <span className="px-2 py-0.5 rounded-full bg-secondary border border-border text-[10px] font-mono text-muted-foreground">
+                    {group.employees.length}
+                  </span>
+                </div>
 
-                      <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
-                        <span className="text-muted-foreground font-mono">
-                          {emp.currentWage ? formatCurrency(emp.currentWage) + '/mo' : 'No Contract'}
-                        </span>
-                        <span className="text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1 font-medium">
-                          Profile
-                          <ArrowUpRight className="w-3.5 h-3.5" />
-                        </span>
-                      </div>
+                <div className="space-y-3 min-h-[150px]">
+                  {group.employees.length === 0 ? (
+                    <div className="p-6 text-center text-xs text-muted-foreground italic border border-dashed border-border rounded-lg">
+                      No members in this department
                     </div>
-                  ))
-                )}
+                  ) : (
+                    group.employees.map((emp: any) => (
+                      <div
+                        key={emp.id}
+                        onClick={() => navigate(`/employees/${emp.id}`)}
+                        className="group p-4 rounded-lg bg-card border border-border hover:border-primary/50 transition-all duration-200 cursor-pointer shadow-sm hover:shadow-md hover:translate-y-[-2px]"
+                      >
+                        <div className="flex items-start justify-between gap-3">
+                          <div className="flex items-center gap-3">
+                            <img
+                              src={emp.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emp.name)}`}
+                              alt={emp.name}
+                              onError={(e) => {
+                                e.currentTarget.onerror = null;
+                                e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emp.name)}`;
+                              }}
+                              className="w-10 h-10 rounded-lg border border-border object-cover shadow-sm"
+                            />
+                            <div>
+                              <h4 className="text-xs font-bold text-foreground group-hover:text-primary transition-colors">
+                                {emp.name}
+                              </h4>
+                              <p className="text-[11px] text-muted-foreground">
+                                {emp.jobPosition?.title || 'Staff'}
+                              </p>
+                            </div>
+                          </div>
+                          <StatusBadge status={emp.status} size="sm" />
+                        </div>
+
+                        <div className="mt-4 pt-3 border-t border-border flex items-center justify-between text-[11px]">
+                          <span className="text-muted-foreground font-mono">
+                            {emp.currentWage ? formatCurrency(emp.currentWage) + '/mo' : 'No Contract'}
+                          </span>
+                          <span className="text-primary group-hover:translate-x-0.5 transition-transform flex items-center gap-1 font-medium">
+                            Profile
+                            <ArrowUpRight className="w-3.5 h-3.5" />
+                          </span>
+                        </div>
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
-        </div>
+            ))}
+          </div>
+        )
       ) : (
         /* List View */
         <div className="rounded-xl border border-border bg-card overflow-hidden shadow-sm">
@@ -240,6 +264,10 @@ export const EmployeeKanbanPage: React.FC = () => {
                     <img
                       src={emp.avatarUrl || `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emp.name)}`}
                       alt={emp.name}
+                      onError={(e) => {
+                        e.currentTarget.onerror = null;
+                        e.currentTarget.src = `https://api.dicebear.com/7.x/avataaars/svg?seed=${encodeURIComponent(emp.name)}`;
+                      }}
                       className="w-8 h-8 rounded-lg object-cover border border-border"
                     />
                     <div>

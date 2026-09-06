@@ -628,75 +628,10 @@ export const DashboardPage: React.FC = () => {
       {/* ========================================================================= */}
       {isManagerOrAdmin && (
         <div className="space-y-6 font-sans">
-          {/* Filter Bar */}
-          <div className="p-4 rounded-xl bg-card border border-border shadow-sm flex flex-wrap items-center gap-4 text-xs font-mono">
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground uppercase">Period</span>
-              <select
-                value={selectedPeriod}
-                onChange={(e) => setSelectedPeriod(e.target.value)}
-                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
-              >
-                <option value="All Periods">All Periods</option>
-                {payruns.map((p) => (
-                  <option key={p.id} value={p.name}>
-                    {p.name}
-                  </option>
-                ))}
-                {payruns.length === 0 && (
-                  <>
-                    <option value="Sep 2026">Sep 2026</option>
-                    <option value="Aug 2026">Aug 2026</option>
-                    <option value="Jul 2026">Jul 2026</option>
-                  </>
-                )}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span className="text-[10px] text-muted-foreground uppercase">Department</span>
-              <select
-                value={selectedDept}
-                onChange={(e) => setSelectedDept(e.target.value)}
-                className="bg-secondary border border-border rounded-md px-3 py-1.5 text-foreground focus:outline-none"
-              >
-                <option value="">All Departments</option>
-                {departments.map((d) => (
-                  <option key={d.id} value={d.id}>
-                    {d.name}
-                  </option>
-                ))}
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3 sm:ml-auto font-sans">
-              <div className="px-3 py-1.5 rounded-md bg-secondary border border-border text-left font-mono">
-                <span className="text-[9px] font-semibold text-muted-foreground uppercase block">
-                  Today
-                </span>
-                <span className="text-xs font-bold text-foreground">
-                  {todayHours.toFixed(1)} hrs
-                </span>
-              </div>
-
-              <button
-                type="button"
-                onClick={toggleCheckIn}
-                className={`flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-semibold shadow-sm transition-all ${isCheckedIn
-                  ? 'bg-rose-600 hover:bg-rose-700 text-white'
-                  : 'bg-emerald-600 hover:bg-emerald-700 text-white'
-                  }`}
-              >
-                <Clock className="w-3.5 h-3.5" />
-                <span>{isCheckedIn ? 'Punch Out' : 'Punch In'}</span>
-              </button>
-            </div>
-          </div>
-
           {/* Top 5 KPI Metric Cards */}
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
             {/* Card 1: Total Net Salary Paid */}
-            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2 overflow-hidden">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Total Net Salary Paid
               </span>
@@ -709,7 +644,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Card 2: Payslips Generated */}
-            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2 overflow-hidden">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Payslips Generated
               </span>
@@ -722,7 +657,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Card 3: Avg Salary / Employee */}
-            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2 overflow-hidden">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Avg Salary / Employee
               </span>
@@ -735,7 +670,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Card 4: Approved Time Off Days */}
-            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2 overflow-hidden">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Approved Time Off Days
               </span>
@@ -748,7 +683,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Card 5: Attendance Health */}
-            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2">
+            <div className="p-4 rounded-xl bg-card border border-border shadow-sm space-y-2 overflow-hidden">
               <span className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider block font-mono">
                 Attendance Health
               </span>
@@ -764,26 +699,26 @@ export const DashboardPage: React.FC = () => {
           {/* Middle Row Charts & Status */}
           <div className="grid grid-cols-1 lg:grid-cols-12 gap-6">
             {/* Chart 1: Salary Cost by Department */}
-            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4 overflow-hidden">
               <div>
                 <h3 className="text-sm font-bold text-foreground">Salary Cost by Department</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Payslips + Employee Department</span>
               </div>
 
-              <div className="h-44 flex items-end justify-between gap-3 pt-6 px-2 border-b border-border font-mono text-[10px]">
+              <div className="h-44 flex items-end justify-between gap-1 pt-6 px-1 border-b border-border font-mono text-[10px] w-full overflow-hidden">
                 {deptCosts.length > 0
                   ? deptCosts.map((bar) => {
                       const costVal = Number(bar.salaryCost || 0);
                       const heightPct = maxDeptCost > 0 ? Math.max(20, Math.round((costVal / maxDeptCost) * 100)) : 20;
                       const formattedVal = costVal >= 1000 ? `₹${(costVal / 1000).toFixed(0)}k` : `₹${costVal}`;
                       return (
-                        <div key={bar.departmentId || bar.department} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
-                          <span className="text-[10px] font-bold text-sky-400">{formattedVal}</span>
+                        <div key={bar.departmentId || bar.department} className="flex-1 min-w-0 flex flex-col items-center gap-1 h-full justify-end group">
+                          <span className="text-[9px] font-bold text-sky-400 truncate w-full text-center">{formattedVal}</span>
                           <div
                             className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
                             style={{ height: `${heightPct}%` }}
                           />
-                          <span className="text-muted-foreground font-semibold uppercase text-[9px] truncate max-w-[55px]">{bar.department}</span>
+                          <span className="text-muted-foreground font-semibold uppercase text-[8px] truncate w-full text-center" title={bar.department}>{bar.department}</span>
                         </div>
                       );
                     })
@@ -794,20 +729,20 @@ export const DashboardPage: React.FC = () => {
                       { dept: 'Finance', val: '₹120k', height: '70%' },
                       { dept: 'IT', val: '₹170k', height: '95%' }
                     ].map((bar) => (
-                      <div key={bar.dept} className="flex-1 flex flex-col items-center gap-1.5 h-full justify-end group">
-                        <span className="text-[10px] font-bold text-sky-400">{bar.val}</span>
+                      <div key={bar.dept} className="flex-1 min-w-0 flex flex-col items-center gap-1 h-full justify-end group">
+                        <span className="text-[9px] font-bold text-sky-400 truncate w-full text-center">{bar.val}</span>
                         <div
                           className="w-full rounded-t-md bg-sky-600/80 hover:bg-sky-500 transition-all duration-300 shadow-sm"
                           style={{ height: bar.height }}
                         />
-                        <span className="text-muted-foreground font-semibold uppercase text-[9px]">{bar.dept}</span>
+                        <span className="text-muted-foreground font-semibold uppercase text-[8px] truncate w-full text-center" title={bar.dept}>{bar.dept}</span>
                       </div>
                     ))}
               </div>
             </div>
 
             {/* Chart 2: Monthly Net Salary Trend */}
-            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4 overflow-hidden">
               <div>
                 <h3 className="text-sm font-bold text-foreground">Monthly Net Salary Trend</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: historical Payslips / Payruns</span>
@@ -883,7 +818,7 @@ export const DashboardPage: React.FC = () => {
             </div>
 
             {/* Widget 3: Payslip Status & Payroll Alerts */}
-            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4">
+            <div className="lg:col-span-4 p-5 rounded-xl bg-card border border-border shadow-sm space-y-4 overflow-hidden">
               <div>
                 <h3 className="text-sm font-bold text-foreground">Payslip Status & Payroll Alerts</h3>
                 <span className="text-[10px] text-muted-foreground font-mono">Source: Payrun + Payslip validation</span>

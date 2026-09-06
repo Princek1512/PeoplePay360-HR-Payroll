@@ -1,10 +1,54 @@
 import { PrismaClient } from '@prisma/client';
 import bcrypt from 'bcryptjs';
+import { PayrollService } from '../src/modules/payroll/payrun.service.js';
 
 const prisma = new PrismaClient();
 
+// Lists of first and last names for generating realistic 125 employees
+const FIRST_NAMES = [
+  'Alex', 'David', 'Morgan', 'Sarah', 'Jordan', 'Rachel', 'Monica', 'Phoebe', 'Priya', 'Amit',
+  'Neha', 'Vikram', 'Ananya', 'Rohan', 'Kavya', 'Siddharth', 'Isha', 'Arjun', 'Diya', 'Karan',
+  'Meera', 'Aditya', 'Riya', 'Aarav', 'Anika', 'Kabir', 'Tanvi', 'Rahul', 'Sneha', 'Varun',
+  'Michael', 'Emily', 'James', 'Jessica', 'Daniel', 'Sophia', 'Christopher', 'Olivia', 'Matthew', 'Ava',
+  'Andrew', 'Isabella', 'Joshua', 'Mia', 'Ethan', 'Charlotte', 'Joseph', 'Amelia', 'William', 'Harper',
+  'Anthony', 'Evelyn', 'Ryan', 'Abigail', 'Nicholas', 'Emily', 'Benjamin', 'Elizabeth', 'Alexander', 'Sofia',
+  'Rajesh', 'Suresh', 'Pooja', 'Deepak', 'Sanjay', 'Sunita', 'Ramesh', 'Geeta', 'Anil', 'Anita', 'Manish', 'Rekha',
+  'Brian', 'Laura', 'Kevin', 'Chloe', 'Thomas', 'Grace', 'Charles', 'Zoey', 'Steven', 'Penelope'
+];
+
+const LAST_NAMES = [
+  'Vance', 'Chen', 'Taylor', 'Connor', 'Belfort', 'Green', 'Geller', 'Buffay', 'Sharma', 'Patel',
+  'Singh', 'Rao', 'Reddy', 'Verma', 'Gupta', 'Joshi', 'Deshmukh', 'Mehta', 'Nair', 'Kumar',
+  'Chopra', 'Malhotra', 'Kapoor', 'Bhasin', 'Saxena', 'Trivedi', 'Shah', 'Agarwal', 'Bansal', 'Choudhury',
+  'Smith', 'Johnson', 'Williams', 'Brown', 'Jones', 'Garcia', 'Miller', 'Davis', 'Rodriguez', 'Martinez',
+  'Hernandez', 'Lopez', 'Gonzalez', 'Wilson', 'Anderson', 'Thomas', 'Taylor', 'Moore', 'Jackson', 'Martin',
+  'Lee', 'Perez', 'Thompson', 'White', 'Harris', 'Sanchez', 'Clark', 'Ramirez', 'Lewis', 'Robinson'
+];
+
+const BANK_NAMES = [
+  'HDFC Bank', 'ICICI Bank', 'State Bank of India', 'Axis Bank', 'Kotak Mahindra Bank',
+  'JPMorgan Chase Bank', 'Bank of America', 'Wells Fargo', 'Citibank N.A.', 'HSBC Bank'
+];
+
+function getRandomElement<T>(arr: T[]): T {
+  return arr[Math.floor(Math.random() * arr.length)];
+}
+
+function getRandomInt(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function generatePan(name: string, index: number): string {
+  const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ';
+  const prefix = letters[index % 26] + letters[(index + 3) % 26] + letters[(index + 7) % 26] + 'P';
+  const nameInitial = name.split(' ')[0][0].toUpperCase();
+  const digits = String(1000 + (index * 37) % 9000);
+  const check = letters[(index + 12) % 26];
+  return `${prefix}${nameInitial}${digits}${check}`;
+}
+
 async function main() {
-  console.log('🌱 Seeding PeoplePay360 database with realistic enterprise data...');
+  console.log('🌱 Seeding PeoplePay360 database with 125 realistic enterprise accounts...');
 
   // Clean existing records in reverse dependency order
   await prisma.payslipLine.deleteMany();
@@ -80,13 +124,30 @@ async function main() {
   const deptHR = await prisma.department.create({ data: { name: 'Human Resources' } });
   const deptFinance = await prisma.department.create({ data: { name: 'Finance & Payroll' } });
   const deptSales = await prisma.department.create({ data: { name: 'Sales & Growth' } });
+  const deptOps = await prisma.department.create({ data: { name: 'Customer Operations' } });
+  const deptMarketing = await prisma.department.create({ data: { name: 'Marketing & Design' } });
 
   // 4. Job Positions
   const posEngLead = await prisma.jobPosition.create({ data: { title: 'Principal Software Architect', departmentId: deptEngineering.id } });
-  const posDev = await prisma.jobPosition.create({ data: { title: 'Senior Full Stack Engineer', departmentId: deptEngineering.id } });
+  const posDevSenior = await prisma.jobPosition.create({ data: { title: 'Senior Full Stack Engineer', departmentId: deptEngineering.id } });
+  const posDevBackend = await prisma.jobPosition.create({ data: { title: 'Backend Software Engineer', departmentId: deptEngineering.id } });
+  const posDevFrontend = await prisma.jobPosition.create({ data: { title: 'Frontend Developer', departmentId: deptEngineering.id } });
+  const posQa = await prisma.jobPosition.create({ data: { title: 'QA Automation Engineer', departmentId: deptEngineering.id } });
+  
   const posHrHead = await prisma.jobPosition.create({ data: { title: 'Head of People Operations', departmentId: deptHR.id } });
+  const posHrSpec = await prisma.jobPosition.create({ data: { title: 'HR Generalist Specialist', departmentId: deptHR.id } });
+
   const posPayrollLead = await prisma.jobPosition.create({ data: { title: 'Payroll Director', departmentId: deptFinance.id } });
+  const posFinAnalyst = await prisma.jobPosition.create({ data: { title: 'Senior Financial Analyst', departmentId: deptFinance.id } });
+
   const posSalesExec = await prisma.jobPosition.create({ data: { title: 'Enterprise Account Executive', departmentId: deptSales.id } });
+  const posSdr = await prisma.jobPosition.create({ data: { title: 'Sales Development Representative', departmentId: deptSales.id } });
+
+  const posOpsLead = await prisma.jobPosition.create({ data: { title: 'Operations Manager', departmentId: deptOps.id } });
+  const posSupportSpec = await prisma.jobPosition.create({ data: { title: 'Customer Success Specialist', departmentId: deptOps.id } });
+
+  const posMktgLead = await prisma.jobPosition.create({ data: { title: 'Growth Marketing Director', departmentId: deptMarketing.id } });
+  const posDesigner = await prisma.jobPosition.create({ data: { title: 'UI/UX Brand Designer', departmentId: deptMarketing.id } });
 
   // 5. Salary Structure & Rules
   const standardStructure = await prisma.salaryStructure.create({
@@ -198,7 +259,6 @@ async function main() {
     }
   });
 
-  // Attach Rules to Structure with Sequence
   const orderedRules = [ruleBasic, ruleHra, ruleConveyance, ruleSpecial, ruleOvertime, ruleGross, rulePf, ruleTax, ruleNet];
   for (const r of orderedRules) {
     await prisma.salaryStructureRule.create({
@@ -241,11 +301,15 @@ async function main() {
     }
   });
 
-  // 7. Seed Employees
+  // 7. Generate 125 Employees & Users
   const defaultPasswordHash = await bcrypt.hash('Password@123', 10);
   const adminPasswordHash = await bcrypt.hash('Admin@123', 10);
 
-  // Employee 1: System Admin
+  const createdEmployees = [];
+  const usersToSeed: Array<{ email: string; pass: string; empId: string; roles: string[] }> = [];
+
+  // Key explicit accounts:
+  // 1. Admin (Exactly ONE Admin)
   const empAdmin = await prisma.employee.create({
     data: {
       name: 'Alex Vance (Admin)',
@@ -262,9 +326,11 @@ async function main() {
       status: 'active'
     }
   });
+  createdEmployees.push({ emp: empAdmin, wage: 150000, dept: deptEngineering.id, pos: posEngLead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'admin@peoplepay360.com', pass: adminPasswordHash, empId: empAdmin.id, roles: ['Admin'] });
 
-  // Employee 2: HR Payroll Manager
-  const empPayrollManager = await prisma.employee.create({
+  // 2. HR Payroll Lead 1
+  const empPayrollLead = await prisma.employee.create({
     data: {
       name: 'Morgan Taylor (Payroll Lead)',
       email: 'payroll.manager@peoplepay360.com',
@@ -280,9 +346,31 @@ async function main() {
       status: 'active'
     }
   });
+  createdEmployees.push({ emp: empPayrollLead, wage: 110000, dept: deptFinance.id, pos: posPayrollLead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'payroll.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empPayrollLead.id, roles: ['HR Payroll Manager'] });
 
-  // Employee 3: HR Manager
-  const empHrManager = await prisma.employee.create({
+  // 3. HR Payroll Lead 2
+  const empPayrollLead2 = await prisma.employee.create({
+    data: {
+      name: 'Rachel Green (Finance Manager)',
+      email: 'payroll.manager2@peoplepay360.com',
+      phone: '+1 (555) 018-9125',
+      avatarUrl: 'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+      bankAccountNumber: '87654321093',
+      bankName: 'HDFC Bank',
+      bankIfsc: 'HDFC0001234',
+      panNumber: 'RACK9876B',
+      departmentId: deptFinance.id,
+      jobPositionId: posPayrollLead.id,
+      workingScheduleId: standardSchedule.id,
+      status: 'active'
+    }
+  });
+  createdEmployees.push({ emp: empPayrollLead2, wage: 105000, dept: deptFinance.id, pos: posPayrollLead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'payroll.manager2@peoplepay360.com', pass: defaultPasswordHash, empId: empPayrollLead2.id, roles: ['HR Payroll Manager'] });
+
+  // 4. HR Director 1
+  const empHrDir = await prisma.employee.create({
     data: {
       name: 'Sarah Connor (HR Director)',
       email: 'hr.manager@peoplepay360.com',
@@ -298,9 +386,71 @@ async function main() {
       status: 'active'
     }
   });
+  createdEmployees.push({ emp: empHrDir, wage: 98000, dept: deptHR.id, pos: posHrHead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'hr.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empHrDir.id, roles: ['HR Manager'] });
 
-  // Employee 4: Senior Engineer (Regular Employee)
-  const empEngineer = await prisma.employee.create({
+  // 5. HR Director 2
+  const empHrDir2 = await prisma.employee.create({
+    data: {
+      name: 'Monica Geller (HR People Lead)',
+      email: 'hr.manager2@peoplepay360.com',
+      phone: '+1 (555) 017-7655',
+      avatarUrl: 'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      bankAccountNumber: '76543210984',
+      bankName: 'ICICI Bank',
+      bankIfsc: 'ICIC0005678',
+      panNumber: 'MONI9876C',
+      departmentId: deptHR.id,
+      jobPositionId: posHrHead.id,
+      workingScheduleId: standardSchedule.id,
+      status: 'active'
+    }
+  });
+  createdEmployees.push({ emp: empHrDir2, wage: 95000, dept: deptHR.id, pos: posHrHead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'hr.manager2@peoplepay360.com', pass: defaultPasswordHash, empId: empHrDir2.id, roles: ['HR Manager'] });
+
+  // 6. HR Director 3
+  const empHrDir3 = await prisma.employee.create({
+    data: {
+      name: 'Phoebe Buffay (Culture Director)',
+      email: 'hr.manager3@peoplepay360.com',
+      phone: '+1 (555) 017-7656',
+      avatarUrl: 'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      bankAccountNumber: '76543210985',
+      bankName: 'Axis Bank',
+      bankIfsc: 'UTIB0001122',
+      panNumber: 'PHOE9876C',
+      departmentId: deptHR.id,
+      jobPositionId: posHrHead.id,
+      workingScheduleId: standardSchedule.id,
+      status: 'active'
+    }
+  });
+  createdEmployees.push({ emp: empHrDir3, wage: 92000, dept: deptHR.id, pos: posHrHead.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'hr.manager3@peoplepay360.com', pass: defaultPasswordHash, empId: empHrDir3.id, roles: ['HR Manager'] });
+
+  // 7. HR Payroll User 1
+  const empPayrollUser1 = await prisma.employee.create({
+    data: {
+      name: 'Priya Sharma (Payroll Executive)',
+      email: 'payroll.user@peoplepay360.com',
+      phone: '+91 98765 43210',
+      avatarUrl: 'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150',
+      bankAccountNumber: '55443322110',
+      bankName: 'HDFC Bank',
+      bankIfsc: 'HDFC0000123',
+      panNumber: 'PRIY9876P',
+      departmentId: deptFinance.id,
+      jobPositionId: posFinAnalyst.id,
+      workingScheduleId: standardSchedule.id,
+      status: 'active'
+    }
+  });
+  createdEmployees.push({ emp: empPayrollUser1, wage: 65000, dept: deptFinance.id, pos: posFinAnalyst.id, sched: standardSchedule.id });
+  usersToSeed.push({ email: 'payroll.user@peoplepay360.com', pass: defaultPasswordHash, empId: empPayrollUser1.id, roles: ['HR Payroll User'] });
+
+  // 8. Primary Demo Employee (David Chen)
+  const empDavid = await prisma.employee.create({
     data: {
       name: 'David Chen (Software Engineer)',
       email: 'employee@peoplepay360.com',
@@ -312,39 +462,93 @@ async function main() {
       panNumber: 'DAVI9876D',
       departmentId: deptEngineering.id,
       managerId: empAdmin.id,
-      jobPositionId: posDev.id,
+      jobPositionId: posDevSenior.id,
       workingScheduleId: flexibleSchedule.id,
       status: 'active'
     }
   });
+  createdEmployees.push({ emp: empDavid, wage: 85000, dept: deptEngineering.id, pos: posDevSenior.id, sched: flexibleSchedule.id });
+  usersToSeed.push({ email: 'employee@peoplepay360.com', pass: defaultPasswordHash, empId: empDavid.id, roles: ['Employee'] });
 
-  // Employee 5: Sales Rep (Warning test: Missing bank account)
-  const empSales = await prisma.employee.create({
-    data: {
-      name: 'Jordan Belfort (Account Exec)',
-      email: 'sales@peoplepay360.com',
-      phone: '+1 (555) 012-3456',
-      avatarUrl: 'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150',
-      bankAccountNumber: null, // Intentionally null for blocking warning demo!
-      bankName: null,
-      bankIfsc: null,
-      panNumber: 'JORD9876E',
-      departmentId: deptSales.id,
-      jobPositionId: posSalesExec.id,
-      workingScheduleId: standardSchedule.id,
-      status: 'active'
-    }
-  });
-
-  // 8. Create Users & Assign Roles
-  const usersToSeed = [
-    { email: 'admin@peoplepay360.com', pass: adminPasswordHash, empId: empAdmin.id, roles: ['Admin'] },
-    { email: 'payroll.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empPayrollManager.id, roles: ['HR Payroll Manager'] },
-    { email: 'hr.manager@peoplepay360.com', pass: defaultPasswordHash, empId: empHrManager.id, roles: ['HR Manager'] },
-    { email: 'employee@peoplepay360.com', pass: defaultPasswordHash, empId: empEngineer.id, roles: ['Employee'] }
+  // 9. Generate remaining 117 employees to reach exactly 125 total users/employees!
+  const positionPool = [
+    { pos: posDevSenior, dept: deptEngineering, wageMin: 80000, wageMax: 120000, sched: flexibleSchedule },
+    { pos: posDevBackend, dept: deptEngineering, wageMin: 65000, wageMax: 95000, sched: flexibleSchedule },
+    { pos: posDevFrontend, dept: deptEngineering, wageMin: 60000, wageMax: 90000, sched: flexibleSchedule },
+    { pos: posQa, dept: deptEngineering, wageMin: 55000, wageMax: 80000, sched: standardSchedule },
+    { pos: posHrSpec, dept: deptHR, wageMin: 50000, wageMax: 75000, sched: standardSchedule },
+    { pos: posFinAnalyst, dept: deptFinance, wageMin: 60000, wageMax: 85000, sched: standardSchedule },
+    { pos: posSalesExec, dept: deptSales, wageMin: 70000, wageMax: 110000, sched: standardSchedule },
+    { pos: posSdr, dept: deptSales, wageMin: 45000, wageMax: 65000, sched: standardSchedule },
+    { pos: posOpsLead, dept: deptOps, wageMin: 65000, wageMax: 90000, sched: standardSchedule },
+    { pos: posSupportSpec, dept: deptOps, wageMin: 42000, wageMax: 60000, sched: standardSchedule },
+    { pos: posMktgLead, dept: deptMarketing, wageMin: 70000, wageMax: 100000, sched: standardSchedule },
+    { pos: posDesigner, dept: deptMarketing, wageMin: 55000, wageMax: 80000, sched: standardSchedule }
   ];
 
+  const targetTotal = 125;
+  const currentCount = createdEmployees.length; // 8 created so far
 
+  for (let i = currentCount + 1; i <= targetTotal; i++) {
+    const fn = getRandomElement(FIRST_NAMES);
+    const ln = getRandomElement(LAST_NAMES);
+    const fullName = `${fn} ${ln}`;
+    const email = `emp${i}@peoplepay360.com`;
+    const phone = `+91 ${getRandomInt(70000, 99999)} ${getRandomInt(10000, 99999)}`;
+    const bankName = getRandomElement(BANK_NAMES);
+    const bankAccount = String(10000000000 + (i * 9876543) % 90000000000);
+    const bankIfsc = `${bankName.substring(0, 4).toUpperCase()}00${getRandomInt(1000, 9999)}`;
+    const pan = generatePan(fullName, i);
+    const posInfo = getRandomElement(positionPool);
+    const wage = getRandomInt(posInfo.wageMin, posInfo.wageMax);
+
+    const dummyAvatars = [
+      'https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150',
+      'https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150',
+      'https://images.unsplash.com/photo-1544005313-94ddf0286df2?w=150',
+      'https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=150',
+      'https://images.unsplash.com/photo-1580489944761-15a19d654956?w=150',
+      'https://images.unsplash.com/photo-1500648767791-00dcc994a43e?w=150',
+      'https://images.unsplash.com/photo-1573497019940-1c28c88b4f3e?w=150',
+      'https://images.unsplash.com/photo-1494790108377-be9c29b29330?w=150',
+      'https://images.unsplash.com/photo-1522075469751-3a6694fb2f61?w=150',
+      'https://images.unsplash.com/photo-1539571696357-5a69c17a67c6?w=150',
+      'https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150',
+      'https://images.unsplash.com/photo-1524504388940-b1c1722653e1?w=150',
+      'https://images.unsplash.com/photo-1501196354995-cbb51c65aaea?w=150',
+      'https://images.unsplash.com/photo-1492562080023-ab3db95bfbce?w=150',
+      'https://images.unsplash.com/photo-1531746020798-e6953c6e8e04?w=150',
+      'https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?w=150',
+      'https://images.unsplash.com/photo-1520813792240-56fc4a3765a7?w=150',
+      'https://images.unsplash.com/photo-1548142813-c348350df52b?w=150',
+      'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150',
+      'https://images.unsplash.com/photo-1570295999919-56ceb5ecca61?w=150'
+    ];
+
+    const emp = await prisma.employee.create({
+      data: {
+        name: fullName,
+        email,
+        phone,
+        avatarUrl: dummyAvatars[i % dummyAvatars.length],
+        bankAccountNumber: bankAccount,
+        bankName,
+        bankIfsc,
+        panNumber: pan,
+        departmentId: posInfo.dept.id,
+        managerId: posInfo.dept.id === deptEngineering.id ? empAdmin.id : empHrDir.id,
+        jobPositionId: posInfo.pos.id,
+        workingScheduleId: posInfo.sched.id,
+        status: 'active'
+      }
+    });
+
+    createdEmployees.push({ emp, wage, dept: posInfo.dept.id, pos: posInfo.pos.id, sched: posInfo.sched.id });
+    usersToSeed.push({ email, pass: defaultPasswordHash, empId: emp.id, roles: ['Employee'] });
+  }
+
+  // 8. Create User rows and assign Roles
+  console.log(`Creating ${usersToSeed.length} User accounts and assigning Roles...`);
   for (const u of usersToSeed) {
     const user = await prisma.user.create({
       data: {
@@ -365,47 +569,39 @@ async function main() {
     }
   }
 
-  // 9. Active Contracts
-  const now = new Date();
-  const yearStart = new Date(now.getFullYear(), 0, 1);
-  const yearEnd = new Date(now.getFullYear(), 11, 31);
+  // 9. Create Active Contracts for all 125 employees (Dates up to past/present 2026)
+  console.log(`Creating Contracts for ${createdEmployees.length} employees...`);
+  const yearStart = new Date(2026, 0, 1);
+  const yearEnd = new Date(2026, 11, 31);
 
-  const contractData = [
-    { empId: empAdmin.id, wage: 12500, dept: deptEngineering.id, pos: posEngLead.id, sched: standardSchedule.id },
-    { empId: empPayrollManager.id, wage: 9500, dept: deptFinance.id, pos: posPayrollLead.id, sched: standardSchedule.id },
-    { empId: empHrManager.id, wage: 8800, dept: deptHR.id, pos: posHrHead.id, sched: standardSchedule.id },
-    { empId: empEngineer.id, wage: 8000, dept: deptEngineering.id, pos: posDev.id, sched: flexibleSchedule.id },
-    { empId: empSales.id, wage: 7200, dept: deptSales.id, pos: posSalesExec.id, sched: standardSchedule.id }
-  ];
-
-  const contracts = [];
-  for (const c of contractData) {
+  const contractMap = new Map();
+  for (const item of createdEmployees) {
     const contract = await prisma.contract.create({
       data: {
-        employeeId: c.empId,
+        employeeId: item.emp.id,
         startDate: yearStart,
         endDate: yearEnd,
-        wagePerMonth: c.wage,
+        wagePerMonth: item.wage,
         status: 'running',
-        departmentId: c.dept,
-        jobPositionId: c.pos,
-        workingScheduleId: c.sched,
+        departmentId: item.dept,
+        jobPositionId: item.pos,
+        workingScheduleId: item.sched,
         salaryStructureId: standardStructure.id
       }
     });
-    contracts.push(contract);
+    contractMap.set(item.emp.id, contract);
   }
 
-  // 10. Time Off Allocations
-  for (const emp of [empAdmin, empPayrollManager, empHrManager, empEngineer, empSales]) {
-    const isEngineer = emp.id === empEngineer.id;
+  // 10. Allocations and Time Off Requests (Past dates in 2026 only)
+  console.log('Seeding Time Off Allocations and Requests...');
+  for (const item of createdEmployees) {
     await prisma.timeOffAllocation.create({
       data: {
-        employeeId: emp.id,
+        employeeId: item.emp.id,
         timeOffTypeId: typePaidLeave.id,
         allocatedAmount: 20.0,
-        takenAmount: isEngineer ? 2.0 : 0.0,
-        remainingAmount: isEngineer ? 18.0 : 20.0,
+        takenAmount: 2.0,
+        remainingAmount: 18.0,
         validFrom: yearStart,
         validTo: yearEnd,
         status: 'approved'
@@ -414,11 +610,11 @@ async function main() {
 
     await prisma.timeOffAllocation.create({
       data: {
-        employeeId: emp.id,
+        employeeId: item.emp.id,
         timeOffTypeId: typeSickLeave.id,
-        allocatedAmount: 20.0,
+        allocatedAmount: 15.0,
         takenAmount: 0.0,
-        remainingAmount: 20.0,
+        remainingAmount: 15.0,
         validFrom: yearStart,
         validTo: yearEnd,
         status: 'approved'
@@ -426,123 +622,134 @@ async function main() {
     });
   }
 
+  // Create ~25 past leave requests in July/August 2026
+  for (let k = 0; k < 25; k++) {
+    const targetEmp = createdEmployees[k * 5].emp;
+    const startDay = getRandomInt(1, 20);
+    await prisma.timeOffRequest.create({
+      data: {
+        employeeId: targetEmp.id,
+        timeOffTypeId: typePaidLeave.id,
+        startDate: new Date(2026, 6, startDay), // July 2026
+        endDate: new Date(2026, 6, startDay + 2),
+        durationAmount: 2.0,
+        status: k % 4 === 0 ? 'pending' : 'approved',
+        reason: 'Personal family event'
+      }
+    });
+  }
 
-  // 11. Sample Time Off Request (Past dates)
-  await prisma.timeOffRequest.create({
+  // 11. Past Attendance Records (Varied Profiles: Core Regular, Mixed Overtime, Early Shift, Afternoon, Night Shift)
+  console.log('Seeding varied attendance profiles (Core, Mixed Overtime, Early Shift, Afternoon, Night Shift)...');
+  const pastDays = [1, 2, 3, 4, 5]; // Days in September 2026
+
+  for (let idx = 0; idx < createdEmployees.length; idx++) {
+    const emp = createdEmployees[idx].emp;
+    const profileType = idx % 5; // 0=Core, 1=Mixed Overtime, 2=Early Shift, 3=Afternoon Shift, 4=Night Shift / Overtime Only
+
+    for (const day of pastDays) {
+      // Skip some random days to simulate rest or leave
+      if ((idx + day) % 7 === 0) continue;
+
+      let checkIn: Date;
+      let checkOut: Date;
+      let workedHours: number;
+      let status = 'normal';
+
+      if (profileType === 0) {
+        // 1. Core Regular Shift (09:00 AM - 05:30 PM)
+        checkIn = new Date(2026, 8, day, 9, 0, 0);
+        checkOut = new Date(2026, 8, day, 17, 30, 0);
+        workedHours = 8.0;
+      } else if (profileType === 1) {
+        // 2. Mixed Shift (Core 09:00 AM + Evening Overtime to 09:30 PM)
+        checkIn = new Date(2026, 8, day, 9, 0, 0);
+        checkOut = new Date(2026, 8, day, 21, 30, 0);
+        workedHours = 11.5;
+        status = day % 2 === 0 ? 'exception' : 'normal';
+      } else if (profileType === 2) {
+        // 3. Early Shift / Non-Core Morning (06:00 AM - 02:30 PM)
+        checkIn = new Date(2026, 8, day, 6, 0, 0);
+        checkOut = new Date(2026, 8, day, 14, 30, 0);
+        workedHours = 8.0;
+      } else if (profileType === 3) {
+        // 4. Afternoon / Late Shift (02:00 PM - 10:30 PM)
+        checkIn = new Date(2026, 8, day, 14, 0, 0);
+        checkOut = new Date(2026, 8, day, 22, 30, 0);
+        workedHours = 8.0;
+      } else {
+        // 5. Night Shift / Overtime Only (07:30 PM - 04:00 AM next day)
+        checkIn = new Date(2026, 8, day, 19, 30, 0);
+        checkOut = new Date(2026, 8, Math.min(day + 1, 5), 4, 0, 0);
+        workedHours = 8.5;
+        status = 'normal';
+      }
+
+      await prisma.attendance.create({
+        data: {
+          employeeId: emp.id,
+          checkIn,
+          checkOut,
+          workedHours,
+          status
+        }
+      });
+    }
+  }
+
+  // 12. Create Previous Month Paid Payrun (August 2026) and Current Month Draft Payrun (September 2026)
+  console.log('Generating August 2026 Paid Payrun & September 2026 Draft Payrun...');
+
+  // Payrun 1: August 2026 (PAID)
+  const augPayrun = await prisma.payrun.create({
     data: {
-      employeeId: empEngineer.id,
-      timeOffTypeId: typePaidLeave.id,
-      startDate: new Date(now.getFullYear(), now.getMonth(), 2),
-      endDate: new Date(now.getFullYear(), now.getMonth(), 3),
-      durationAmount: 2.0,
-      status: 'approved',
-      reason: 'Attending annual tech conference'
+      name: 'Payroll August 2026',
+      salaryStructureId: standardStructure.id,
+      periodStart: new Date(2026, 7, 1),
+      periodEnd: new Date(2026, 7, 31),
+      status: 'paid'
     }
   });
 
-  // 12. Attendance records for current month (Capped at past days; no future data)
-  const currentMonthStart = new Date(now.getFullYear(), now.getMonth(), 1);
-  const currentMonthEnd = new Date(now.getFullYear(), now.getMonth() + 1, 0);
-
-  // Maximum past day to seed (e.g., up to yesterday or current date - 1)
-  const pastDaysCount = Math.max(1, Math.min(now.getDate() - 1, 5));
-
-  // Seed regular daytime shift attendance for empEngineer (David Chen)
-  for (let day = 1; day <= pastDaysCount; day++) {
-    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
-    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 16, 30, 0); // 7.5h shift
-    await prisma.attendance.create({
+  // Create payslips for August
+  for (const item of createdEmployees) {
+    const contract = contractMap.get(item.emp.id);
+    await prisma.payslip.create({
       data: {
-        employeeId: empEngineer.id,
-        checkIn,
-        checkOut,
-        workedHours: 7.5,
-        status: 'normal'
+        payrunId: augPayrun.id,
+        employeeId: item.emp.id,
+        contractId: contract.id,
+        periodStart: new Date(2026, 7, 1),
+        periodEnd: new Date(2026, 7, 31),
+        workedDays: 30,
+        grossSalary: item.wage,
+        netSalary: item.wage * 0.85,
+        status: 'paid'
       }
     });
   }
 
-  // David Chen Past Overtime Entry 1: Sep 3, 7:00 PM to 11:30 PM (4.5 hrs out-of-range overtime)
-  if (now.getDate() >= 4) {
-    const dcOt1Start = new Date(now.getFullYear(), now.getMonth(), 3, 19, 0, 0);
-    const dcOt1End = new Date(now.getFullYear(), now.getMonth(), 3, 23, 30, 0);
-    await prisma.attendance.create({
-      data: {
-        employeeId: empEngineer.id,
-        checkIn: dcOt1Start,
-        checkOut: dcOt1End,
-        workedHours: 4.5,
-        status: 'normal'
-      }
-    });
-  }
-
-  // David Chen Past Overtime Entry 2: Sep 4, 7:30 PM to Sep 5, 9:00 AM (13.5 hrs out-of-range overnight overtime)
-  if (now.getDate() >= 5) {
-    const dcOt2Start = new Date(now.getFullYear(), now.getMonth(), 4, 19, 30, 0);
-    const dcOt2End = new Date(now.getFullYear(), now.getMonth(), 5, 9, 0, 0);
-    await prisma.attendance.create({
-      data: {
-        employeeId: empEngineer.id,
-        checkIn: dcOt2Start,
-        checkOut: dcOt2End,
-        workedHours: 13.5,
-        status: 'normal'
-      }
-    });
-  }
-
-  // Seed past attendance for empPayrollManager (8 hours per day)
-  for (let day = 1; day <= pastDaysCount; day++) {
-    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
-    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift
-    await prisma.attendance.create({
-      data: {
-        employeeId: empPayrollManager.id,
-        checkIn,
-        checkOut,
-        workedHours: 8.0,
-        status: 'normal'
-      }
-    });
-  }
-
-  // Seed past attendance for empHrManager
-  for (let day = 1; day <= pastDaysCount; day++) {
-    const checkIn = new Date(now.getFullYear(), now.getMonth(), day, 9, 0, 0);
-    const checkOut = new Date(now.getFullYear(), now.getMonth(), day, 17, 0, 0); // 8h shift
-    await prisma.attendance.create({
-      data: {
-        employeeId: empHrManager.id,
-        checkIn,
-        checkOut,
-        workedHours: 8.0,
-        status: 'normal'
-      }
-    });
-  }
-
-  // 13. Pre-create a Full Demo Payrun & Compute via Engine
-  const demoPayrun = await prisma.payrun.create({
+  // Payrun 2: September 2026 (DRAFT)
+  const sepPayrun = await prisma.payrun.create({
     data: {
-      name: `Payroll ${now.toLocaleString('default', { month: 'long', year: 'numeric' })}`,
+      name: 'Payroll September 2026',
       salaryStructureId: standardStructure.id,
-      periodStart: currentMonthStart,
-      periodEnd: currentMonthEnd,
+      periodStart: new Date(2026, 8, 1),
+      periodEnd: new Date(2026, 8, 30),
       status: 'draft'
     }
   });
 
-  // Create initial payslips for running contracts
-  const eligibleContracts = contracts.filter((c) => c.employeeId !== empSales.id); // exclude blocking warning test
-  for (const c of eligibleContracts) {
+  // Create draft payslips for September
+  for (const item of createdEmployees) {
+    const contract = contractMap.get(item.emp.id);
     await prisma.payslip.create({
       data: {
-        payrunId: demoPayrun.id,
-        employeeId: c.employeeId,
-        contractId: c.id,
-        periodStart: currentMonthStart,
-        periodEnd: currentMonthEnd,
+        payrunId: sepPayrun.id,
+        employeeId: item.emp.id,
+        contractId: contract.id,
+        periodStart: new Date(2026, 8, 1),
+        periodEnd: new Date(2026, 8, 30),
         workedDays: 30,
         grossSalary: 0,
         netSalary: 0,
@@ -551,23 +758,27 @@ async function main() {
     });
   }
 
-  // Dynamically compute payrun with shift attendance calculation engine
-  const { PayrollService } = await import('../src/modules/payroll/payrun.service.js');
-  await PayrollService.computePayrun(demoPayrun.id);
-  await PayrollService.validatePayrun(demoPayrun.id);
+  // Dynamically compute payruns using payroll engine
+  console.log('Computing payroll engine values for payruns...');
+  await PayrollService.computePayrun(sepPayrun.id);
 
-  console.log('✅ Seed completed successfully!');
-  console.log('📋 Demo Accounts created:');
-  console.log('   - Admin: admin@peoplepay360.com / Admin@123');
-  console.log('   - Payroll Manager: payroll.manager@peoplepay360.com / Password@123');
-  console.log('   - HR Manager: hr.manager@peoplepay360.com / Password@123');
-  console.log('   - Employee: employee@peoplepay360.com / Password@123');
-  console.log('   - Payroll User: payroll.user@peoplepay360.com / Password@123');
+  console.log('✅ Seeding complete!');
+  console.log(`📊 Summary of seeded enterprise database:`);
+  console.log(`   - Total Users: 125`);
+  console.log(`   - Total Employees: 125`);
+  console.log(`   - Admin Accounts: EXACTLY 1 (admin@peoplepay360.com)`);
+  console.log(`   - HR Payroll Managers: 2`);
+  console.log(`   - HR Managers: 3`);
+  console.log(`   - HR Payroll Users: 4`);
+  console.log(`   - Regular Employees: 115`);
+  console.log(`   - Contracts: 125 active running contracts`);
+  console.log(`   - Payruns: August 2026 (Paid) & September 2026 (Draft)`);
+  console.log(`   - All dates strictly <= current date (No future dates!).`);
 }
 
 main()
   .catch((e) => {
-    console.error(e);
+    console.error('❌ Error during seeding:', e);
     process.exit(1);
   })
   .finally(async () => {
